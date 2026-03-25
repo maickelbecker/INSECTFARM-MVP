@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Monitoramento</title>
+</head>
+<body>
+
+<h2>Monitoramento Ambiental</h2>
+
+<label>Lote:</label>
+<select id="lote"></select>
+
+<label>Bandeja:</label>
+<select id="bandeja"></select>
+
+<p id="infoEstagio"></p>
+
+<label>Temperatura (°C):</label>
+<input type="number" id="temperatura">
+
+<label>Umidade (%):</label>
+<input type="number" id="umidade">
+
+<button id="btnSalvarMonitoramento">Salvar</button>
+
+<h3>Registros</h3>
+<ul id="listaRegistros"></ul>
+
+<script>
+let lotes = JSON.parse(localStorage.getItem("lotes")) || [];
+let ciclos = JSON.parse(localStorage.getItem("ciclos")) || [];
+let monitoramento = JSON.parse(localStorage.getItem("monitoramento")) || [];
+
+lotes.forEach(l => {
+    lote.innerHTML += `<option value="${l.id}">Lote ${l.id}</option>`;
+});
+
+lote.onchange = carregarBandejas;
+bandeja.onchange = mostrarEstagio;
+
+function carregarBandejas() {
+    let l = lotes.find(x => x.id == lote.value);
+    bandeja.innerHTML = "";
+    for (let i = 1; i <= l.bandejas; i++) {
+        bandeja.innerHTML += `<option value="${i}">Bandeja ${i}</option>`;
+    }
+    mostrarEstagio();
+}
+
+function mostrarEstagio() {
+    let ciclo = ciclos.find(c => c.lote == lote.value && c.bandeja == bandeja.value);
+    infoEstagio.textContent = ciclo ? `Estágio: ${ciclo.estagio}` : "Nenhum ciclo registrado";
+}
+
+document.getElementById("btnSalvarMonitoramento").onclick = function () {
+    monitoramento.push({
+        lote: Number(lote.value),
+        bandeja: Number(bandeja.value),
+        temp: Number(temperatura.value),
+        umid: Number(umidade.value),
+        data: new Date().toLocaleString()
+    });
+
+    localStorage.setItem("monitoramento", JSON.stringify(monitoramento));
+    carregarRegistros();
+};
+
+function carregarRegistros() {
+    listaRegistros.innerHTML = "";
+    monitoramento.forEach(r => {
+        let li = document.createElement("li");
+        li.textContent = `Lote ${r.lote} | Bandeja ${r.bandeja} | Temp: ${r.temp}°C | Umid: ${r.umid}% | ${r.data}`;
+        listaRegistros.appendChild(li);
+    });
+}
+
+carregarBandejas();
+carregarRegistros();
+</script>
+
+</body>
+</html>

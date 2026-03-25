@@ -1,34 +1,37 @@
-<h2>Criar Conta</h2>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Cadastro</title>
+</head>
+<body>
 
-<form id="formCadastro">
-  <input type="text" id="nome" placeholder="Nome" required>
-  <input type="email" id="email" placeholder="Email" required>
-  <input type="password" id="senha" placeholder="Senha" required>
-  <button type="submit">Cadastrar</button>
-</form>
+<h2>Cadastrar Usuário</h2>
+
+<input id="novoUsuario" placeholder="Novo usuário">
+<input id="novaSenha" type="password" placeholder="Nova senha">
+<button id="btnCadastrar">Cadastrar</button>
+<button onclick="window.location.href='login.html'">Voltar</button>
 
 <script>
-document.getElementById("formCadastro").addEventListener("submit", function(e){
-    e.preventDefault();
+document.getElementById("btnCadastrar").onclick = function () {
+    let email = novoUsuario.value;
+    let pass = novaSenha.value;
 
     let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
 
-    let novoUsuario = {
-        nome: nome.value,
-        email: email.value,
-        senha: senha.value
-    };
-
-    // Verifica se email já existe
-    if (usuarios.some(u => u.email === novoUsuario.email)) {
-        alert("Email já cadastrado!");
+    if (usuarios.some(u => u.email === email)) {
+        alert("Usuário já existe");
         return;
     }
 
-    usuarios.push(novoUsuario);
+    usuarios.push({ email: email, senha: pass });
     localStorage.setItem("usuarios", JSON.stringify(usuarios));
 
-    alert("Conta criada com sucesso!");
+    alert("Usuário cadastrado!");
     window.location.href = "login.html";
-});
+};
 </script>
+
+</body>
+</html>

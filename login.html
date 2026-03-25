@@ -1,27 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Login</title>
+</head>
+<body>
+
 <h2>Login</h2>
 
-<form id="formLogin">
-  <input type="email" id="email" placeholder="Email" required>
-  <input type="password" id="senha" placeholder="Senha" required>
-  <button type="submit">Entrar</button>
-</form>
+<input id="usuario" placeholder="Usuário">
+<input id="senha" type="password" placeholder="Senha">
+<button id="btnEntrar">Entrar</button>
+<button onclick="window.location.href='cadastro.html'">Criar conta</button>
 
 <script>
-document.getElementById("formLogin").addEventListener("submit", function(e){
-    e.preventDefault();
+document.getElementById("btnEntrar").onclick = function () {
+    let email = usuario.value;
+    let pass = senha.value;
 
     let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
 
-    let usuario = usuarios.find(u => u.email === email.value && u.senha === senha.value);
+    let user = usuarios.find(u => u.email === email && u.senha === pass);
 
-    if (!usuario) {
-        alert("Email ou senha incorretos!");
+    if (!user) {
+        alert("Usuário ou senha incorretos");
         return;
     }
 
-    localStorage.setItem("usuarioLogado", JSON.stringify(usuario));
-
-    alert("Login realizado!");
-    window.location.href = "lotes.html";
-});
+    localStorage.setItem("usuarioLogado", JSON.stringify(user));
+    window.location.href = "dashboard.html";
+};
 </script>
+
+</body>
+</html>

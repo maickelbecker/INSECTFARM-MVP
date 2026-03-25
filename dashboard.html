@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard</title>
+</head>
+<body>
+
+<h2>Bem-vindo ao InsectFarmManager!</h2>
+
+<button onclick="window.location.href='lotes.html'">Registrar Lotes</button>
+<button onclick="window.location.href='ciclos.html'">Ciclos Biológicos</button>
+<button onclick="window.location.href='monitoramento.html'">Monitoramento Ambiental</button>
+
+<script>
+let user = JSON.parse(localStorage.getItem("usuarioLogado"));
+if (!user) window.location.href = "login.html";
+</script>
+
+</body>
+</html>

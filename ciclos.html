@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Ciclos</title>
+</head>
+<body>
+
+<h2>Ciclos Biológicos</h2>
+
+<label>Lote:</label>
+<select id="lote"></select>
+
+<label>Data:</label>
+<input type="date" id="dataCiclo">
+
+<label>Bandeja:</label>
+<select id="bandeja"></select>
+
+<label>Estágio:</label>
+<select id="estagio">
+  <option value="larval">Larval</option>
+  <option value="pupa">Pupa</option>
+  <option value="adulto">Adulto</option>
+</select>
+
+<button id="btnSalvarCiclo">Salvar</button>
+
+<script>
+let lotes = JSON.parse(localStorage.getItem("lotes")) || [];
+let ciclos = JSON.parse(localStorage.getItem("ciclos")) || [];
+
+lotes.forEach(l => {
+    lote.innerHTML += `<option value="${l.id}">Lote ${l.id}</option>`;
+});
+
+lote.onchange = function () {
+    let l = lotes.find(x => x.id == lote.value);
+    bandeja.innerHTML = "";
+    for (let i = 1; i <= l.bandejas; i++) {
+        bandeja.innerHTML += `<option value="${i}">Bandeja ${i}</option>`;
+    }
+};
+lote.onchange();
+
+document.getElementById("btnSalvarCiclo").onclick = function () {
+    ciclos.push({
+        lote: Number(lote.value),
+        data: dataCiclo.value,
+        bandeja: Number(bandeja.value),
+        estagio: estagio.value
+    });
+
+    localStorage.setItem("ciclos", JSON.stringify(ciclos));
+    alert("Ciclo registrado!");
+};
+</script>
+
+</body>
+</html>

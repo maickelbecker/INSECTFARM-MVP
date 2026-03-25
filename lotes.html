@@ -1,53 +1,56 @@
-<h2>Registrar Lote</h2>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Lotes</title>
+</head>
+<body>
 
-<form id="formLote">
-  <input type="text" id="nomeLote" placeholder="Nome do lote" required>
-  <input type="number" id="quantidade" placeholder="Quantidade" required>
-  <button type="submit">Salvar</button>
-</form>
+<h2>Registro de Lotes</h2>
 
-<h3>Meus Lotes</h3>
+<label>Data do lote:</label>
+<input type="date" id="dataLote">
+
+<label>Quantidade de bandejas:</label>
+<input type="number" id="qtdBandejas">
+
+<button id="btnSalvarLote">Salvar</button>
+
+<h3>Lotes Registrados</h3>
 <ul id="listaLotes"></ul>
 
 <script>
-// Verifica login
-let usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
-if (!usuario) {
-    alert("Você precisa fazer login!");
-    window.location.href = "login.html";
-}
+let user = JSON.parse(localStorage.getItem("usuarioLogado"));
+if (!user) window.location.href = "login.html";
 
-document.getElementById("formLote").addEventListener("submit", function(e){
-    e.preventDefault();
-
+document.getElementById("btnSalvarLote").onclick = function () {
     let lotes = JSON.parse(localStorage.getItem("lotes")) || [];
 
     let novoLote = {
-        usuario: usuario.email,
-        nome: nomeLote.value,
-        quantidade: quantidade.value,
-        data: new Date().toLocaleString()
+        id: lotes.length + 1,
+        data: dataLote.value,
+        bandejas: Number(qtdBandejas.value)
     };
 
     lotes.push(novoLote);
     localStorage.setItem("lotes", JSON.stringify(lotes));
 
     carregarLotes();
-    formLote.reset();
-});
+};
 
 function carregarLotes() {
     let lotes = JSON.parse(localStorage.getItem("lotes")) || [];
-    let meus = lotes.filter(l => l.usuario === usuario.email);
-
     listaLotes.innerHTML = "";
 
-    meus.forEach(l => {
+    lotes.forEach(l => {
         let li = document.createElement("li");
-        li.textContent = `${l.nome} - ${l.quantidade} unidades (${l.data})`;
+        li.textContent = `Lote ${l.id} — ${l.data} — ${l.bandejas} bandejas`;
         listaLotes.appendChild(li);
     });
 }
 
 carregarLotes();
 </script>
+
+</body>
+</html>
