@@ -8,6 +8,7 @@
 <body>
 
 <div class="sidebar">
+    <h2>InsectFarmManager - MVP</h2>
     <ul>
         <li onclick="window.location.href='dashboard.html'">Dashboard</li>
         <li onclick="window.location.href='lotes.html'">Lotes</li>
@@ -25,7 +26,10 @@
 <label>Bandeja:</label>
 <select id="bandeja"></select>
 
-<p id="infoEstagio"></p>
+<label>Data do Registro:</label>
+<input type="date" id="dataRegistro">
+
+<p id="infoEstagio" style="font-weight: bold; margin-top: 10px;"></p>
 
 <label>Temperatura (°C):</label>
 <input type="number" id="temperatura">
@@ -44,6 +48,7 @@ let lotes = JSON.parse(localStorage.getItem("lotes")) || [];
 let ciclos = JSON.parse(localStorage.getItem("ciclos")) || [];
 let monitoramento = JSON.parse(localStorage.getItem("monitoramento")) || [];
 
+/* ======== CARREGAR LOTES ======== */
 function carregarLotes() {
     lote.innerHTML = "";
     lotes.forEach(l => {
@@ -52,6 +57,7 @@ function carregarLotes() {
     carregarBandejas();
 }
 
+/* ======== CARREGAR BANDEJAS ======== */
 function carregarBandejas() {
     let l = lotes.find(x => x.id == lote.value);
     bandeja.innerHTML = "";
@@ -61,36 +67,53 @@ function carregarBandejas() {
     mostrarEstagio();
 }
 
+/* ======== MOSTRAR ESTÁGIO BIOLÓGICO ======== */
 function mostrarEstagio() {
     let ciclo = ciclos.find(c => c.lote == lote.value && c.bandeja == bandeja.value);
     infoEstagio.textContent = ciclo ? `Estágio: ${ciclo.estagio}` : "Nenhum ciclo registrado";
 }
 
-lote.onchange = carregarBandejas;
-bandeja.onchange = mostrarEstagio;
-
+/* ======== SALVAR MONITORAMENTO ======== */
 document.getElementById("btnSalvarMonitoramento").onclick = function () {
+
+    if (!dataRegistro.value || !temperatura.value || !umidade.value) {
+        alert("Preencha todos os campos");
+        return;
+    }
+
     monitoramento.push({
         lote: Number(lote.value),
         bandeja: Number(bandeja.value),
+        data: dataRegistro.value,
         temp: Number(temperatura.value),
         umid: Number(umidade.value),
-        data: new Date().toLocaleString()
+        registro: new Date().toLocaleString()
     });
 
     localStorage.setItem("monitoramento", JSON.stringify(monitoramento));
     carregarRegistros();
+
+    temperatura.value = "";
+    umidade.value = "";
 };
 
+/* ======== LISTAR REGISTROS ======== */
 function carregarRegistros() {
     listaRegistros.innerHTML = "";
     monitoramento.forEach(r => {
         let li = document.createElement("li");
-        li.textContent = `Lote ${r.lote} | Bandeja ${r.bandeja} | Temp: ${r.temp}°C | Umid: ${r.umid}% | ${r.data}`;
+        li.textContent = 
+            `Lote ${r.lote} | Bandeja ${r.bandeja} | Data: ${r.data} | ` +
+            `Temp: ${r.temp}°C | Umid: ${r.umid}% | Registrado em: ${r.registro}`;
         listaRegistros.appendChild(li);
     });
 }
 
+/* ======== EVENTOS ======== */
+lote.onchange = carregarBandejas;
+bandeja.onchange = mostrarEstagio;
+
+/* ======== INICIALIZAÇÃO ======== */
 carregarLotes();
 carregarRegistros();
 </script>
