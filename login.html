@@ -1,19 +1,27 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Login</title>
-</head>
-<body>
-  <h2>Login</h2>
+<h2>Login</h2>
 
-  <input type="text" placeholder="Usuário"><br><br>
-  <input type="password" placeholder="Senha"><br><br>
+<form id="formLogin">
+  <input type="email" id="email" placeholder="Email" required>
+  <input type="password" id="senha" placeholder="Senha" required>
+  <button type="submit">Entrar</button>
+</form>
 
-  <button>Entrar</button>
-  <br><br>
+<script>
+document.getElementById("formLogin").addEventListener("submit", function(e){
+    e.preventDefault();
 
-  <a href="cadastro.html">Criar Conta</a><br>
-  <a href="index.html">Voltar ao Início</a>
-</body>
-</html>
+    let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+
+    let usuario = usuarios.find(u => u.email === email.value && u.senha === senha.value);
+
+    if (!usuario) {
+        alert("Email ou senha incorretos!");
+        return;
+    }
+
+    localStorage.setItem("usuarioLogado", JSON.stringify(usuario));
+
+    alert("Login realizado!");
+    window.location.href = "lotes.html";
+});
+</script>

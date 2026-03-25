@@ -1,22 +1,53 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Registro de Lotes</title>
-</head>
-<body>
-  <h2>Registro de Lotes</h2>
+<h2>Registrar Lote</h2>
 
-  <input type="text" placeholder="Nome do lote">
-  <button>Salvar</button>
+<form id="formLote">
+  <input type="text" id="nomeLote" placeholder="Nome do lote" required>
+  <input type="number" id="quantidade" placeholder="Quantidade" required>
+  <button type="submit">Salvar</button>
+</form>
 
-  <h3>Lotes Registrados</h3>
-  <ul>
-    <li>Lote A</li>
-    <li>Lote B</li>
-    <li>Lote C</li>
-  </ul>
+<h3>Meus Lotes</h3>
+<ul id="listaLotes"></ul>
 
-  <a href="index.html">Voltar</a>
-</body>
-</html>
+<script>
+// Verifica login
+let usuario = JSON.parse(localStorage.getItem("usuarioLogado"));
+if (!usuario) {
+    alert("Você precisa fazer login!");
+    window.location.href = "login.html";
+}
+
+document.getElementById("formLote").addEventListener("submit", function(e){
+    e.preventDefault();
+
+    let lotes = JSON.parse(localStorage.getItem("lotes")) || [];
+
+    let novoLote = {
+        usuario: usuario.email,
+        nome: nomeLote.value,
+        quantidade: quantidade.value,
+        data: new Date().toLocaleString()
+    };
+
+    lotes.push(novoLote);
+    localStorage.setItem("lotes", JSON.stringify(lotes));
+
+    carregarLotes();
+    formLote.reset();
+});
+
+function carregarLotes() {
+    let lotes = JSON.parse(localStorage.getItem("lotes")) || [];
+    let meus = lotes.filter(l => l.usuario === usuario.email);
+
+    listaLotes.innerHTML = "";
+
+    meus.forEach(l => {
+        let li = document.createElement("li");
+        li.textContent = `${l.nome} - ${l.quantidade} unidades (${l.data})`;
+        listaLotes.appendChild(li);
+    });
+}
+
+carregarLotes();
+</script>
