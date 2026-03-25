@@ -3,9 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <title>Monitoramento</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<div class="sidebar">
+    <ul>
+        <li onclick="window.location.href='dashboard.html'">Dashboard</li>
+        <li onclick="window.location.href='lotes.html'">Lotes</li>
+        <li onclick="window.location.href='ciclos.html'">Ciclos</li>
+        <li onclick="window.location.href='monitoramento.html'">Monitoramento</li>
+    </ul>
+</div>
+
+<div class="content">
 <h2>Monitoramento Ambiental</h2>
 
 <label>Lote:</label>
@@ -26,18 +37,20 @@
 
 <h3>Registros</h3>
 <ul id="listaRegistros"></ul>
+</div>
 
 <script>
 let lotes = JSON.parse(localStorage.getItem("lotes")) || [];
 let ciclos = JSON.parse(localStorage.getItem("ciclos")) || [];
 let monitoramento = JSON.parse(localStorage.getItem("monitoramento")) || [];
 
-lotes.forEach(l => {
-    lote.innerHTML += `<option value="${l.id}">Lote ${l.id}</option>`;
-});
-
-lote.onchange = carregarBandejas;
-bandeja.onchange = mostrarEstagio;
+function carregarLotes() {
+    lote.innerHTML = "";
+    lotes.forEach(l => {
+        lote.innerHTML += `<option value="${l.id}">Lote ${l.id}</option>`;
+    });
+    carregarBandejas();
+}
 
 function carregarBandejas() {
     let l = lotes.find(x => x.id == lote.value);
@@ -52,6 +65,9 @@ function mostrarEstagio() {
     let ciclo = ciclos.find(c => c.lote == lote.value && c.bandeja == bandeja.value);
     infoEstagio.textContent = ciclo ? `Estágio: ${ciclo.estagio}` : "Nenhum ciclo registrado";
 }
+
+lote.onchange = carregarBandejas;
+bandeja.onchange = mostrarEstagio;
 
 document.getElementById("btnSalvarMonitoramento").onclick = function () {
     monitoramento.push({
@@ -75,7 +91,7 @@ function carregarRegistros() {
     });
 }
 
-carregarBandejas();
+carregarLotes();
 carregarRegistros();
 </script>
 

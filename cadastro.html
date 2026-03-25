@@ -3,15 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <title>Cadastro</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h2>Cadastrar Usuário</h2>
+<div class="container">
+    <h2>Cadastrar Usuário</h2>
 
-<input id="novoUsuario" placeholder="Novo usuário">
-<input id="novaSenha" type="password" placeholder="Nova senha">
-<button id="btnCadastrar">Cadastrar</button>
-<button onclick="window.location.href='login.html'">Voltar</button>
+    <input id="novoUsuario" placeholder="Novo usuário">
+    <input id="novaSenha" type="password" placeholder="Nova senha">
+
+    <button id="btnCadastrar">Cadastrar</button>
+    <button onclick="window.location.href='login.html'">Voltar</button>
+</div>
 
 <script>
 document.getElementById("btnCadastrar").onclick = function () {

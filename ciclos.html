@@ -3,9 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <title>Ciclos</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+<div class="sidebar">
+    <ul>
+        <li onclick="window.location.href='dashboard.html'">Dashboard</li>
+        <li onclick="window.location.href='lotes.html'">Lotes</li>
+        <li onclick="window.location.href='ciclos.html'">Ciclos</li>
+        <li onclick="window.location.href='monitoramento.html'">Monitoramento</li>
+    </ul>
+</div>
+
+<div class="content">
 <h2>Ciclos Biológicos</h2>
 
 <label>Lote:</label>
@@ -25,23 +36,29 @@
 </select>
 
 <button id="btnSalvarCiclo">Salvar</button>
+</div>
 
 <script>
 let lotes = JSON.parse(localStorage.getItem("lotes")) || [];
 let ciclos = JSON.parse(localStorage.getItem("ciclos")) || [];
 
-lotes.forEach(l => {
-    lote.innerHTML += `<option value="${l.id}">Lote ${l.id}</option>`;
-});
+function carregarLotes() {
+    lote.innerHTML = "";
+    lotes.forEach(l => {
+        lote.innerHTML += `<option value="${l.id}">Lote ${l.id}</option>`;
+    });
+    carregarBandejas();
+}
 
-lote.onchange = function () {
+function carregarBandejas() {
     let l = lotes.find(x => x.id == lote.value);
     bandeja.innerHTML = "";
     for (let i = 1; i <= l.bandejas; i++) {
         bandeja.innerHTML += `<option value="${i}">Bandeja ${i}</option>`;
     }
-};
-lote.onchange();
+}
+
+lote.onchange = carregarBandejas;
 
 document.getElementById("btnSalvarCiclo").onclick = function () {
     ciclos.push({
@@ -54,6 +71,8 @@ document.getElementById("btnSalvarCiclo").onclick = function () {
     localStorage.setItem("ciclos", JSON.stringify(ciclos));
     alert("Ciclo registrado!");
 };
+
+carregarLotes();
 </script>
 
 </body>

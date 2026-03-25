@@ -3,15 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <title>Login</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h2>Login</h2>
+<div class="container">
+    <h2>Login</h2>
 
-<input id="usuario" placeholder="Usuário">
-<input id="senha" type="password" placeholder="Senha">
-<button id="btnEntrar">Entrar</button>
-<button onclick="window.location.href='cadastro.html'">Criar conta</button>
+    <input id="usuario" placeholder="Usuário">
+    <input id="senha" type="password" placeholder="Senha">
+
+    <button id="btnEntrar">Entrar</button>
+    <button onclick="window.location.href='cadastro.html'">Criar conta</button>
+</div>
 
 <script>
 document.getElementById("btnEntrar").onclick = function () {
