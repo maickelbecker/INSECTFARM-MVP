@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Rendimento da Produção</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>InsectFarmManager - MVP</h2>
+    <ul>
+        <li onclick="window.location.href='dashboard.html'">Dashboard</li>
+        <li onclick="window.location.href='lotes.html'">Lotes</li>
+        <li onclick="window.location.href='ciclos.html'">Ciclos</li>
+        <li onclick="window.location.href='monitoramento.html'">Monitoramento</li>
+        <li onclick="window.location.href='rendimento.html'">Rendimento</li>
+    </ul>
+</div>
+
+<div class="content">
+<h2>Monitoramento do Rendimento da Produção</h2>
+
+<label>Lote:</label>
+<select id="lote"></select>
+
+<label>Bandeja:</label>
+<select id="bandeja"></select>
+
+<label>Data do Registro:</label>
+<input type="date" id="dataRegistro">
+
+<label>Peso Vivo Total (g):</label>
+<input type="number" id="pesoVivo">
+
+<label>Peso Seco (g):</label>
+<input type="number" id="pesoSeco">
+
+<label>Taxa de Crescimento Larval (%):</label>
+<input type="number" step="0.01" id="taxaCrescimento">
+
+<label>Quantidade de Ração (g):</label>
+<input type="number" id="racao">
+
+<label>Momento do Registro:</label>
+<select id="momento">
+    <option value="inicio">Início do Ciclo Larval</option>
+    <option value="colheita">Colheita</option>
+</select>
+
+<button id="btnSalvarRendimento">Salvar</button>
+
+<h3>Registros de Rendimento</h3>
+<ul id="listaRendimento"></ul>
+</div>
+
+<script>
+let lotes = JSON.parse(localStorage.getItem("lotes")) || [];
+let rendimento = JSON.parse(localStorage.getItem("rendimento")) || [];
+
+/* ======== CARREGAR LOTES ======== */
+function carregarLotes() {
+    lote.innerHTML = "";
+    lotes.forEach(l => {
+        lote.innerHTML += `<option value="${l.id}">Lote ${l.id}</option>`;
+    });
+    carregarBandejas();
+}
+
+/* ======== CARREGAR BANDEJAS ======== */
+function carregarBandejas() {
+    let l = lotes.find(x => x.id == lote.value);
+    bandeja.innerHTML = "";
+    for (let i = 1; i <= l.bandejas; i++) {
+        bandeja.innerHTML += `<option value="${i}">Bandeja ${i}</option>`;
+    }
+}
+
+lote.onchange = carregarBandejas;
+
+/* ======== SALVAR RENDIMENTO ======== */
+document.getElementById("btnSalvarRendimento").onclick = function () {
+
+    if (!dataRegistro.value || !pesoVivo.value || !pesoSeco.value || !taxaCrescimento.value) {
+        alert("Preencha todos os campos obrigatórios");
+        return;
+    }
+
+    rendimento.push({
+        lote: Number(lote.value),
+        bandeja: Number(bandeja.value),
+        data: dataRegistro.value,
+        pesoVivo: Number(pesoVivo.value),
+        pesoSeco: Number(pesoSeco.value),
+        taxaCrescimento: Number(taxaCrescimento.value),
+        racao: Number(racao.value),
+        momento: momento.value,
+        registro: new Date().toLocaleString()
+    });
+
+    localStorage.setItem("rendimento", JSON.stringify(rendimento));
+    carregarRegistros();
+
+    pesoVivo.value = "";
+    pesoSeco.value = "";
+    taxaCrescimento.value = "";
+    racao.value = "";
+};
+
+/* ======== LISTAR REGISTROS ======== */
+function carregarRegistros() {
+    listaRendimento.innerHTML = "";
+    rendimento.forEach(r => {
+        let li = document.createElement("li");
+        li.textContent =
+            `Lote ${r.lote} | Bandeja ${r.bandeja} | Data: ${r.data} | ` +
+            `Peso Vivo: ${r.pesoVivo}g | Peso Seco: ${r.pesoSeco}g | ` +
+            `Crescimento: ${r.taxaCrescimento}% | Ração: ${r.racao}g | ` +
+            `Momento: ${r.momento} | Registrado em: ${r.registro}`;
+        listaRendimento.appendChild(li);
+    });
+}
+
+carregarLotes();
+carregarRegistros();
+</script>
+
+</body>
+</html>
