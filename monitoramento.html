@@ -14,6 +14,7 @@
         <li onclick="window.location.href='lotes.html'">Lotes</li>
         <li onclick="window.location.href='ciclos.html'">Ciclos</li>
         <li onclick="window.location.href='monitoramento.html'">Monitoramento</li>
+        <li onclick="window.location.href='rendimento.html'">Rendimento</li>
     </ul>
 </div>
 
@@ -44,6 +45,9 @@
 </div>
 
 <script>
+let user = JSON.parse(localStorage.getItem("usuarioLogado"));
+if (!user) window.location.href = "login.html";
+
 let lotes = JSON.parse(localStorage.getItem("lotes")) || [];
 let ciclos = JSON.parse(localStorage.getItem("ciclos")) || [];
 let monitoramento = JSON.parse(localStorage.getItem("monitoramento")) || [];
@@ -102,7 +106,7 @@ function carregarRegistros() {
     listaRegistros.innerHTML = "";
     monitoramento.forEach(r => {
         let li = document.createElement("li");
-        li.textContent = 
+        li.textContent =
             `Lote ${r.lote} | Bandeja ${r.bandeja} | Data: ${r.data} | ` +
             `Temp: ${r.temp}°C | Umid: ${r.umid}% | Registrado em: ${r.registro}`;
         listaRegistros.appendChild(li);

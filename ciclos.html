@@ -8,11 +8,13 @@
 <body>
 
 <div class="sidebar">
+    <h2>InsectFarmManager - MVP</h2>
     <ul>
         <li onclick="window.location.href='dashboard.html'">Dashboard</li>
         <li onclick="window.location.href='lotes.html'">Lotes</li>
         <li onclick="window.location.href='ciclos.html'">Ciclos</li>
         <li onclick="window.location.href='monitoramento.html'">Monitoramento</li>
+        <li onclick="window.location.href='rendimento.html'">Rendimento</li>
     </ul>
 </div>
 
@@ -39,6 +41,9 @@
 </div>
 
 <script>
+let user = JSON.parse(localStorage.getItem("usuarioLogado"));
+if (!user) window.location.href = "login.html";
+
 let lotes = JSON.parse(localStorage.getItem("lotes")) || [];
 let ciclos = JSON.parse(localStorage.getItem("ciclos")) || [];
 
@@ -61,6 +66,11 @@ function carregarBandejas() {
 lote.onchange = carregarBandejas;
 
 document.getElementById("btnSalvarCiclo").onclick = function () {
+    if (!dataCiclo.value) {
+        alert("Selecione uma data");
+        return;
+    }
+
     ciclos.push({
         lote: Number(lote.value),
         data: dataCiclo.value,
