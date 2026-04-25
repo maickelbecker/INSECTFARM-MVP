@@ -1,67 +1,52 @@
-# 🐛 InsectFarmManager – MVP  
-Sistema simples e funcional para gerenciamento de produção de insetos, incluindo lotes, ciclos biológicos, monitoramento ambiental e rendimento da produção.
+# InsectFarmManager – MVP
+
+Sistema para gerenciamento de criação de insetos, com módulos de lotes, ciclos biológicos, monitoramento ambiental e rendimento produtivo.  
+Este projeto foi desenvolvido como um MVP (Minimum Viable Product) para uso acadêmico, laboratorial e em pequenos sistemas de produção.
 
 ---
 
-## 📌 Sobre o Projeto
-O **InsectFarmManager** é um MVP (Minimum Viable Product) desenvolvido para auxiliar no controle de criação de insetos em ambiente laboratorial ou produtivo.  
-O sistema funciona totalmente **offline**, utilizando **LocalStorage** para armazenar dados.
+## 1. Objetivo do Projeto
 
-Ele foi projetado para ser:
-
-- ✔ Simples  
-- ✔ Rápido  
-- ✔ Intuitivo  
-- ✔ 100% funcional sem servidor  
-- ✔ Ideal para estudos, pesquisas e pequenos produtores  
+O InsectFarmManager tem como finalidade oferecer uma ferramenta simples, funcional e totalmente offline para registrar e acompanhar informações essenciais do processo de criação de insetos.  
+O sistema utiliza apenas HTML, CSS, JavaScript e LocalStorage, dispensando servidores ou bancos de dados externos.
 
 ---
 
-## 🧭 Funcionalidades
+## 2. Funcionalidades do Sistema
 
-### **1. Login e Cadastro**
-- Criação de usuários  
-- Login com validação  
-- Armazenamento local de credenciais  
+### 2.1 Login e Cadastro
+- Criação de novos usuários  
+- Validação de credenciais  
+- Armazenamento local dos dados de acesso  
 
----
-
-### **2. Dashboard**
-Painel principal com acesso rápido a todos os módulos:
-
+### 2.2 Dashboard
+Painel principal com acesso rápido aos módulos:
 - Lotes  
 - Ciclos  
 - Monitoramento  
 - Rendimento  
 
----
-
-### **3. Lotes**
-- Registro de lotes com data  
-- Definição de quantidade de bandejas  
+### 2.3 Lotes
+- Registro de novos lotes  
+- Definição da quantidade de bandejas  
 - Listagem de lotes cadastrados  
+- Dados utilizados pelos demais módulos  
 
----
-
-### **4. Ciclos Biológicos**
+### 2.4 Ciclos Biológicos
 - Seleção de lote e bandeja  
-- Registro do estágio biológico (larva, pupa, adulto)  
-- Integração automática com monitoramento  
+- Registro do estágio biológico (larval, pupa ou adulto)  
+- Integração automática com o módulo de monitoramento  
 
----
-
-### **5. Monitoramento Ambiental**
+### 2.5 Monitoramento Ambiental
 - Registro de temperatura e umidade  
 - Exibição automática do estágio biológico da bandeja  
-- Histórico completo dos registros  
+- Histórico completo dos registros ambientais  
 
----
-
-### **6. Rendimento da Produção**
+### 2.6 Rendimento da Produção
 - Registro de peso vivo, peso seco, taxa de crescimento e ração  
 - Registro por lote e bandeja  
 - Histórico completo dos rendimentos  
 
 ---
 
-## 🗂 Estrutura do Projeto
+## 3. Estrutura do Projeto
