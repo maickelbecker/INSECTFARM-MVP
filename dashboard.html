@@ -9,19 +9,17 @@
 
   <div class="container">
 
-    <h2>Bem-vindo ao InsectFarmManager</h2>
+    <h2>InsectFarmManager</h2>
+    <h3>Dashboard</h3>
 
     <p id="usuarioNome"></p>
-
-    <h3>Menu</h3>
 
     <button onclick="window.location.href='lotes.html'">Gerenciar Lotes</button>
     <button onclick="window.location.href='ciclos.html'">Gerenciar Ciclos</button>
     <button onclick="window.location.href='monitoramento.html'">Monitoramento</button>
     <button onclick="window.location.href='rendimento.html'">Rendimento</button>
 
-    <br><br>
-    <button id="btnSair" style="background:#d9534f;">Sair</button>
+    <button id="btnSair" class="red">Sair</button>
 
   </div>
 
@@ -41,7 +39,6 @@
 
     const app = initializeApp(firebaseConfig);
 
-    // VERIFICA LOGIN
     const usuarioLogado = localStorage.getItem("usuarioLogado");
 
     if (!usuarioLogado) {
@@ -49,10 +46,9 @@
       window.location.href = "login.html";
     } else {
       document.getElementById("usuarioNome").innerText =
-        "Usuário logado: " + usuarioLogado;
+        "Usuário: " + usuarioLogado;
     }
 
-    // SAIR
     document.getElementById("btnSair").onclick = function () {
       localStorage.removeItem("usuarioLogado");
       window.location.href = "login.html";

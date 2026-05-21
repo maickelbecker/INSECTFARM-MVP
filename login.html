@@ -11,22 +11,22 @@
 
     <h2>Login</h2>
 
-    <input id="usuario" type="text" placeholder="Usuário">
+    <input id="login" type="text" placeholder="Email ou nome de usuário">
     <input id="senha" type="password" placeholder="Senha">
 
     <button id="btnEntrar">Entrar</button>
 
     <br><br>
-    <a href="cadastro.html">Criar Conta</a><br>
-    <a href="index.html">Voltar ao Início</a>
+    <a href="cadastro.html">Criar Conta</a>
 
   </div>
 
   <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, query, where, getDocs } 
-      from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { 
+      getFirestore, collection, query, where, getDocs 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBd-iIfDpxpjmrISWZMw_0-sVE9Fj0_C5M",
@@ -42,28 +42,36 @@
     const db = getFirestore(app);
 
     document.getElementById("btnEntrar").onclick = async function () {
-      const user = usuario.value.trim();
+      const loginValue = login.value.trim();
       const pass = senha.value.trim();
 
-      if (!user || !pass) {
-        alert("Preencha usuário e senha");
+      if (!loginValue || !pass) {
+        alert("Preencha todos os campos");
         return;
       }
 
-      const q = query(
+      // Tenta login por email
+      const qEmail = query(
         collection(db, "usuarios"),
-        where("usuario", "==", user),
+        where("email", "==", loginValue),
         where("senha", "==", pass)
       );
+      const rEmail = await getDocs(qEmail);
 
-      const result = await getDocs(q);
+      // Tenta login por usuário
+      const qUser = query(
+        collection(db, "usuarios"),
+        where("usuario", "==", loginValue),
+        where("senha", "==", pass)
+      );
+      const rUser = await getDocs(qUser);
 
-      if (result.empty) {
-        alert("Usuário ou senha incorretos");
+      if (rEmail.empty && rUser.empty) {
+        alert("Login ou senha incorretos");
         return;
       }
 
-      localStorage.setItem("usuarioLogado", user);
+      localStorage.setItem("usuarioLogado", loginValue);
       window.location.href = "dashboard.html";
     };
   </script>

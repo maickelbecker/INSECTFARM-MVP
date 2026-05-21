@@ -11,14 +11,15 @@
 
     <h2>Criar Conta</h2>
 
-    <input id="usuario" type="text" placeholder="Usuário">
+    <input id="usuario" type="text" placeholder="Nome de usuário">
+    <input id="email" type="email" placeholder="Email">
     <input id="senha" type="password" placeholder="Senha">
+    <input id="senha2" type="password" placeholder="Repita a senha">
 
     <button id="btnCadastrar">Cadastrar</button>
 
     <br><br>
-    <a href="login.html">Voltar ao Login</a><br>
-    <a href="index.html">Voltar ao Início</a>
+    <a href="login.html">Voltar ao Login</a>
 
   </div>
 
@@ -44,29 +45,48 @@
 
     document.getElementById("btnCadastrar").onclick = async function () {
       const user = usuario.value.trim();
+      const mail = email.value.trim();
       const pass = senha.value.trim();
+      const pass2 = senha2.value.trim();
 
-      if (!user || !pass) {
-        alert("Preencha usuário e senha");
+      if (!user || !mail || !pass || !pass2) {
+        alert("Preencha todos os campos");
         return;
       }
 
-      // Verifica se já existe
-      const q = query(
+      if (pass !== pass2) {
+        alert("As senhas não coincidem");
+        return;
+      }
+
+      // Verifica se usuário já existe
+      const qUser = query(
         collection(db, "usuarios"),
         where("usuario", "==", user)
       );
+      const rUser = await getDocs(qUser);
 
-      const result = await getDocs(q);
+      if (!rUser.empty) {
+        alert("Este nome de usuário já está em uso");
+        return;
+      }
 
-      if (!result.empty) {
-        alert("Este usuário já existe");
+      // Verifica se email já existe
+      const qEmail = query(
+        collection(db, "usuarios"),
+        where("email", "==", mail)
+      );
+      const rEmail = await getDocs(qEmail);
+
+      if (!rEmail.empty) {
+        alert("Este email já está cadastrado");
         return;
       }
 
       // Cria novo usuário
       await addDoc(collection(db, "usuarios"), {
         usuario: user,
+        email: mail,
         senha: pass
       });
 

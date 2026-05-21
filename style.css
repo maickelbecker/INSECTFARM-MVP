@@ -1,12 +1,11 @@
-/* ======== CONFIGURAÇÃO GERAL ======== */
+/* ======== LAYOUT GERAL ======== */
 
 body {
   font-family: Arial, sans-serif;
-  background: #f2f2f2;
+  background: #e9ecef;
   margin: 0;
   padding: 0;
 
-  /* Centralização perfeita */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -17,33 +16,49 @@ body {
 /* ======== CAIXA CENTRAL ======== */
 
 .container {
-  background: white;
-  padding: 30px;
-  border-radius: 10px;
+  background: #fff;
+  padding: 30px 40px;
+  border-radius: 12px;
 
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-
-  width: 350px;
+  width: 380px;
   text-align: center;
+
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
 }
 
-/* ======== INPUTS, SELECTS E BOTÕES ======== */
+/* ======== TÍTULOS ======== */
 
-input, select, button {
-  width: 90%;
-  padding: 10px;
-  margin: 8px 0;
+h2, h3 {
+  margin-bottom: 15px;
+  color: #333;
+}
 
-  border-radius: 5px;
+/* ======== INPUTS ======== */
+
+input, select {
+  width: 100%;
+  padding: 12px;
+  margin: 8px 0 15px 0;
+
   border: 1px solid #ccc;
+  border-radius: 6px;
   font-size: 15px;
 }
 
+/* ======== BOTÕES ======== */
+
 button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 5px;
+
   background: #007bff;
   color: white;
   border: none;
+  border-radius: 6px;
+
   cursor: pointer;
+  font-size: 16px;
   transition: 0.2s;
 }
 
@@ -51,11 +66,19 @@ button:hover {
   background: #0056b3;
 }
 
+button.red {
+  background: #dc3545;
+}
+
+button.red:hover {
+  background: #b52a36;
+}
+
 /* ======== LINKS ======== */
 
 a {
-  text-decoration: none;
   color: #007bff;
+  text-decoration: none;
   font-size: 14px;
 }
 
@@ -68,15 +91,14 @@ a:hover {
 table {
   width: 100%;
   margin-top: 15px;
-  background: white;
   border-collapse: collapse;
 }
 
-td, th {
-  padding: 8px;
-  border: 1px solid #ddd;
+th, td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
 }
 
 th {
-  background: #f0f0f0;
+  background: #f8f9fa;
 }
