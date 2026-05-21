@@ -1,41 +1,74 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Cadastro</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Cadastro</title>
 </head>
 <body>
 
-<div class="container">
-    <h2>Cadastrar Usuário</h2>
+  <h2>Criar Conta</h2>
 
-    <input id="novoUsuario" placeholder="Novo usuário">
-    <input id="novaSenha" type="password" placeholder="Nova senha">
+  <input id="usuario" type="text" placeholder="Usuário"><br><br>
+  <input id="senha" type="password" placeholder="Senha"><br><br>
 
-    <button id="btnCadastrar">Cadastrar</button>
-    <button onclick="window.location.href='login.html'">Voltar</button>
-</div>
+  <button id="btnCadastrar">Cadastrar</button>
+  <br><br>
 
-<script>
-document.getElementById("btnCadastrar").onclick = function () {
-    let email = novoUsuario.value;
-    let pass = novaSenha.value;
+  <a href="login.html">Voltar ao Login</a><br>
+  <a href="index.html">Voltar ao Início</a>
 
-    let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, query, where, getDocs }
+      from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    if (usuarios.some(u => u.email === email)) {
-        alert("Usuário já existe");
+    const firebaseConfig = {
+      apiKey: "AIzaSyBd-iIfDpxpjmrISWZMw_0-sVE9Fj0_C5M",
+      authDomain: "insectfarmmanager.firebaseapp.com",
+      projectId: "insectfarmmanager",
+      storageBucket: "insectfarmmanager.firebasestorage.app",
+      messagingSenderId: "478537152748",
+      appId: "1:478537152748:web:b5e8217930bd9a5e550dc9",
+      measurementId: "G-47ZZLQSJVD"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // CADASTRO
+    document.getElementById("btnCadastrar").onclick = async function () {
+      const user = usuario.value.trim();
+      const pass = senha.value.trim();
+
+      if (!user || !pass) {
+        alert("Preencha usuário e senha");
         return;
-    }
+      }
 
-    usuarios.push({ email: email, senha: pass });
-    localStorage.setItem("usuarios", JSON.stringify(usuarios));
+      // Verifica se já existe
+      const q = query(
+        collection(db, "usuarios"),
+        where("usuario", "==", user)
+      );
 
-    alert("Usuário cadastrado!");
-    window.location.href = "login.html";
-};
-</script>
+      const result = await getDocs(q);
+
+      if (!result.empty) {
+        alert("Este usuário já existe");
+        return;
+      }
+
+      // Cria novo usuário
+      await addDoc(collection(db, "usuarios"), {
+        usuario: user,
+        senha: pass
+      });
+
+      alert("Conta criada com sucesso!");
+      window.location.href = "login.html";
+    };
+  </script>
 
 </body>
 </html>

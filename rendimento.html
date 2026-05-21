@@ -1,129 +1,155 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Rendimento da Produção</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Rendimento da Produção</title>
 </head>
 <body>
 
-<div class="sidebar">
-    <h2>InsectFarmManager - MVP</h2>
-    <ul>
-        <li onclick="window.location.href='dashboard.html'">Dashboard</li>
-        <li onclick="window.location.href='lotes.html'">Lotes</li>
-        <li onclick="window.location.href='ciclos.html'">Ciclos</li>
-        <li onclick="window.location.href='monitoramento.html'">Monitoramento</li>
-        <li onclick="window.location.href='rendimento.html'">Rendimento</li>
-    </ul>
-</div>
+  <h2>Rendimento da Produção</h2>
 
-<div class="content">
-<h2>Monitoramento do Rendimento da Produção</h2>
+  <a href="dashboard.html">⬅ Voltar ao Dashboard</a>
+  <br><br>
 
-<label>Lote:</label>
-<select id="lote"></select>
+  <h3>Novo Registro de Rendimento</h3>
 
-<label>Bandeja:</label>
-<select id="bandeja"></select>
+  <label>Lote:</label><br>
+  <select id="selectLote"></select><br><br>
 
-<label>Data do Registro:</label>
-<input type="date" id="dataRegistro">
+  <label>Peso Final (kg):</label><br>
+  <input id="peso" type="number" step="0.01"><br><br>
 
-<label>Peso Vivo Total (g):</label>
-<input type="number" id="pesoVivo">
+  <label>Mortalidade (%):</label><br>
+  <input id="mortalidade" type="number" step="0.1"><br><br>
 
-<label>Peso Seco (g):</label>
-<input type="number" id="pesoSeco">
+  <label>Data do Registro:</label><br>
+  <input id="dataRegistro" type="date"><br><br>
 
-<label>Taxa de Crescimento Larval (%):</label>
-<input type="number" step="0.01" id="taxaCrescimento">
+  <button id="btnSalvar">Salvar Rendimento</button>
 
-<label>Quantidade de Ração (g):</label>
-<input type="number" id="racao">
+  <hr>
 
-<label>Momento do Registro:</label>
-<select id="momento">
-    <option value="inicio">Início do Ciclo Larval</option>
-    <option value="colheita">Colheita</option>
-</select>
+  <h3>Histórico de Rendimento</h3>
+  <table border="1" cellpadding="5">
+    <thead>
+      <tr>
+        <th>Lote</th>
+        <th>Peso Final</th>
+        <th>Mortalidade</th>
+        <th>Data</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody id="listaRendimento"></tbody>
+  </table>
 
-<button id="btnSalvarRendimento">Salvar</button>
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+      getFirestore, collection, addDoc, getDocs, deleteDoc, doc 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-<h3>Registros de Rendimento</h3>
-<ul id="listaRendimento"></ul>
-</div>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBd-iIfDpxpjmrISWZMw_0-sVE9Fj0_C5M",
+      authDomain: "insectfarmmanager.firebaseapp.com",
+      projectId: "insectfarmmanager",
+      storageBucket: "insectfarmmanager.firebasestorage.app",
+      messagingSenderId: "478537152748",
+      appId: "1:478537152748:web:b5e8217930bd9a5e550dc9",
+      measurementId: "G-47ZZLQSJVD"
+    };
 
-<script>
-let lotes = JSON.parse(localStorage.getItem("lotes")) || [];
-let rendimento = JSON.parse(localStorage.getItem("rendimento")) || [];
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-/* ======== CARREGAR LOTES ======== */
-function carregarLotes() {
-    lote.innerHTML = "";
-    lotes.forEach(l => {
-        lote.innerHTML += `<option value="${l.id}">Lote ${l.id}</option>`;
-    });
-    carregarBandejas();
-}
+    const selectLote = document.getElementById("selectLote");
+    const lista = document.getElementById("listaRendimento");
 
-/* ======== CARREGAR BANDEJAS ======== */
-function carregarBandejas() {
-    let l = lotes.find(x => x.id == lote.value);
-    bandeja.innerHTML = "";
-    for (let i = 1; i <= l.bandejas; i++) {
-        bandeja.innerHTML += `<option value="${i}">Bandeja ${i}</option>`;
+    // CARREGAR LOTES NO SELECT
+    async function carregarLotes() {
+      selectLote.innerHTML = "";
+
+      const snapshot = await getDocs(collection(db, "lotes"));
+
+      snapshot.forEach((docItem) => {
+        const item = docItem.data();
+
+        const option = document.createElement("option");
+        option.value = docItem.id;
+        option.textContent = `${item.data} - ${item.bandejas} bandejas`;
+
+        selectLote.appendChild(option);
+      });
     }
-}
 
-lote.onchange = carregarBandejas;
+    // SALVAR RENDIMENTO
+    document.getElementById("btnSalvar").onclick = async function () {
+      const loteId = selectLote.value;
+      const pesoFinal = peso.value;
+      const mort = mortalidade.value;
+      const data = dataRegistro.value;
 
-/* ======== SALVAR RENDIMENTO ======== */
-document.getElementById("btnSalvarRendimento").onclick = function () {
-
-    if (!dataRegistro.value || !pesoVivo.value || !pesoSeco.value || !taxaCrescimento.value) {
-        alert("Preencha todos os campos obrigatórios");
+      if (!loteId || !pesoFinal || !mort || !data) {
+        alert("Preencha todos os campos");
         return;
+      }
+
+      await addDoc(collection(db, "rendimento"), {
+        loteId: loteId,
+        pesoFinal: Number(pesoFinal),
+        mortalidade: Number(mort),
+        data: data
+      });
+
+      alert("Rendimento registrado com sucesso!");
+      carregarRendimento();
+    };
+
+    // LISTAR RENDIMENTO
+    async function carregarRendimento() {
+      lista.innerHTML = "";
+
+      const snapshot = await getDocs(collection(db, "rendimento"));
+      const lotesSnapshot = await getDocs(collection(db, "lotes"));
+
+      // Mapa para buscar nome do lote
+      const lotesMap = {};
+      lotesSnapshot.forEach((l) => {
+        lotesMap[l.id] = l.data();
+      });
+
+      snapshot.forEach((docItem) => {
+        const item = docItem.data();
+
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td>${lotesMap[item.loteId]?.data || "Lote removido"}</td>
+          <td>${item.pesoFinal} kg</td>
+          <td>${item.mortalidade}%</td>
+          <td>${item.data}</td>
+          <td>
+            <button onclick="excluirRendimento('${docItem.id}')">Excluir</button>
+          </td>
+        `;
+
+        lista.appendChild(tr);
+      });
     }
 
-    rendimento.push({
-        lote: Number(lote.value),
-        bandeja: Number(bandeja.value),
-        data: dataRegistro.value,
-        pesoVivo: Number(pesoVivo.value),
-        pesoSeco: Number(pesoSeco.value),
-        taxaCrescimento: Number(taxaCrescimento.value),
-        racao: Number(racao.value),
-        momento: momento.value,
-        registro: new Date().toLocaleString()
-    });
+    // EXCLUIR RENDIMENTO
+    window.excluirRendimento = async function (id) {
+      if (confirm("Deseja realmente excluir este registro?")) {
+        await deleteDoc(doc(db, "rendimento", id));
+        carregarRendimento();
+      }
+    };
 
-    localStorage.setItem("rendimento", JSON.stringify(rendimento));
-    carregarRegistros();
-
-    pesoVivo.value = "";
-    pesoSeco.value = "";
-    taxaCrescimento.value = "";
-    racao.value = "";
-};
-
-/* ======== LISTAR REGISTROS ======== */
-function carregarRegistros() {
-    listaRendimento.innerHTML = "";
-    rendimento.forEach(r => {
-        let li = document.createElement("li");
-        li.textContent =
-            `Lote ${r.lote} | Bandeja ${r.bandeja} | Data: ${r.data} | ` +
-            `Peso Vivo: ${r.pesoVivo}g | Peso Seco: ${r.pesoSeco}g | ` +
-            `Crescimento: ${r.taxaCrescimento}% | Ração: ${r.racao}g | ` +
-            `Momento: ${r.momento} | Registrado em: ${r.registro}`;
-        listaRendimento.appendChild(li);
-    });
-}
-
-carregarLotes();
-carregarRegistros();
-</script>
+    // Carrega ao abrir a página
+    carregarLotes();
+    carregarRendimento();
+  </script>
 
 </body>
 </html>

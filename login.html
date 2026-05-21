@@ -1,40 +1,71 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Login</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Login</title>
 </head>
 <body>
 
-<div class="container">
-    <h2>Login</h2>
+  <h2>Login</h2>
 
-    <input id="usuario" placeholder="Usuário">
-    <input id="senha" type="password" placeholder="Senha">
+  <input id="usuario" type="text" placeholder="Usuário"><br><br>
+  <input id="senha" type="password" placeholder="Senha"><br><br>
 
-    <button id="btnEntrar">Entrar</button>
-    <button onclick="window.location.href='cadastro.html'">Criar conta</button>
-</div>
+  <button id="btnEntrar">Entrar</button>
+  <br><br>
 
-<script>
-document.getElementById("btnEntrar").onclick = function () {
-    let email = usuario.value;
-    let pass = senha.value;
+  <a href="cadastro.html">Criar Conta</a><br>
+  <a href="index.html">Voltar ao Início</a>
 
-    let usuarios = JSON.parse(localStorage.getItem("usuarios")) || [];
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, query, where, getDocs } 
+      from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    let user = usuarios.find(u => u.email === email && u.senha === pass);
+    const firebaseConfig = {
+      apiKey: "AIzaSyBd-iIfDpxpjmrISWZMw_0-sVE9Fj0_C5M",
+      authDomain: "insectfarmmanager.firebaseapp.com",
+      projectId: "insectfarmmanager",
+      storageBucket: "insectfarmmanager.firebasestorage.app",
+      messagingSenderId: "478537152748",
+      appId: "1:478537152748:web:b5e8217930bd9a5e550dc9",
+      measurementId: "G-47ZZLQSJVD"
+    };
 
-    if (!user) {
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // LOGIN
+    document.getElementById("btnEntrar").onclick = async function () {
+      const user = usuario.value.trim();
+      const pass = senha.value.trim();
+
+      if (!user || !pass) {
+        alert("Preencha usuário e senha");
+        return;
+      }
+
+      const q = query(
+        collection(db, "usuarios"),
+        where("usuario", "==", user),
+        where("senha", "==", pass)
+      );
+
+      const result = await getDocs(q);
+
+      if (result.empty) {
         alert("Usuário ou senha incorretos");
         return;
-    }
+      }
 
-    localStorage.setItem("usuarioLogado", JSON.stringify(user));
-    window.location.href = "dashboard.html";
-};
-</script>
+      // Salva o usuário logado localmente
+      localStorage.setItem("usuarioLogado", user);
+
+      // Redireciona
+      window.location.href = "dashboard.html";
+    };
+  </script>
 
 </body>
 </html>

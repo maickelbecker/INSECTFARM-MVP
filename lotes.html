@@ -1,77 +1,115 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Lotes</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Gerenciar Lotes</title>
 </head>
 <body>
 
-<div class="sidebar">
-    <h2>InsectFarmManager - MVP</h2>
-    <ul>
-        <li onclick="window.location.href='dashboard.html'">Dashboard</li>
-        <li onclick="window.location.href='lotes.html'">Lotes</li>
-        <li onclick="window.location.href='ciclos.html'">Ciclos</li>
-        <li onclick="window.location.href='monitoramento.html'">Monitoramento</li>
-        <li onclick="window.location.href='rendimento.html'">Rendimento</li>
-    </ul>
-</div>
+  <h2>Gerenciar Lotes</h2>
 
-<div class="content">
-<h2>Registro de Lotes</h2>
+  <a href="dashboard.html">⬅ Voltar ao Dashboard</a>
+  <br><br>
 
-<label>Data do lote:</label>
-<input type="date" id="dataLote">
+  <h3>Novo Lote</h3>
 
-<label>Quantidade de bandejas:</label>
-<input type="number" id="qtdBandejas" min="1">
+  <label>Data do Lote:</label><br>
+  <input id="dataLote" type="date"><br><br>
 
-<button id="btnSalvarLote">Salvar</button>
+  <label>Quantidade de Bandejas:</label><br>
+  <input id="qtdBandejas" type="number" min="1"><br><br>
 
-<h3>Lotes Registrados</h3>
-<ul id="listaLotes"></ul>
-</div>
+  <button id="btnSalvar">Salvar Lote</button>
 
-<script>
-let user = JSON.parse(localStorage.getItem("usuarioLogado"));
-if (!user) window.location.href = "login.html";
+  <hr>
 
-document.getElementById("btnSalvarLote").onclick = function () {
-    let lotes = JSON.parse(localStorage.getItem("lotes")) || [];
+  <h3>Lotes Cadastrados</h3>
+  <table border="1" cellpadding="5">
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Bandejas</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody id="listaLotes"></tbody>
+  </table>
 
-    if (!dataLote.value || !qtdBandejas.value) {
-        alert("Preencha todos os campos");
-        return;
-    }
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+      getFirestore, collection, addDoc, getDocs, deleteDoc, doc 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    let novoLote = {
-        id: lotes.length + 1,
-        data: dataLote.value,
-        bandejas: Number(qtdBandejas.value)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBd-iIfDpxpjmrISWZMw_0-sVE9Fj0_C5M",
+      authDomain: "insectfarmmanager.firebaseapp.com",
+      projectId: "insectfarmmanager",
+      storageBucket: "insectfarmmanager.firebasestorage.app",
+      messagingSenderId: "478537152748",
+      appId: "1:478537152748:web:b5e8217930bd9a5e550dc9",
+      measurementId: "G-47ZZLQSJVD"
     };
 
-    lotes.push(novoLote);
-    localStorage.setItem("lotes", JSON.stringify(lotes));
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
+    const lista = document.getElementById("listaLotes");
+
+    // SALVAR LOTE
+    document.getElementById("btnSalvar").onclick = async function () {
+      const data = dataLote.value;
+      const bandejas = qtdBandejas.value;
+
+      if (!data || !bandejas) {
+        alert("Preencha todos os campos");
+        return;
+      }
+
+      await addDoc(collection(db, "lotes"), {
+        data: data,
+        bandejas: Number(bandejas)
+      });
+
+      alert("Lote salvo com sucesso!");
+      carregarLotes();
+    };
+
+    // LISTAR LOTES
+    async function carregarLotes() {
+      lista.innerHTML = "";
+
+      const snapshot = await getDocs(collection(db, "lotes"));
+
+      snapshot.forEach((docItem) => {
+        const item = docItem.data();
+
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td>${item.data}</td>
+          <td>${item.bandejas}</td>
+          <td>
+            <button onclick="excluirLote('${docItem.id}')">Excluir</button>
+          </td>
+        `;
+
+        lista.appendChild(tr);
+      });
+    }
+
+    // EXCLUIR LOTE
+    window.excluirLote = async function (id) {
+      if (confirm("Deseja realmente excluir este lote?")) {
+        await deleteDoc(doc(db, "lotes", id));
+        carregarLotes();
+      }
+    };
+
+    // Carrega ao abrir a página
     carregarLotes();
-    dataLote.value = "";
-    qtdBandejas.value = "";
-};
-
-function carregarLotes() {
-    let lotes = JSON.parse(localStorage.getItem("lotes")) || [];
-    listaLotes.innerHTML = "";
-
-    lotes.forEach(l => {
-        let li = document.createElement("li");
-        li.textContent = `Lote ${l.id} — ${l.data} — ${l.bandejas} bandejas`;
-        listaLotes.appendChild(li);
-    });
-}
-
-carregarLotes();
-</script>
+  </script>
 
 </body>
 </html>

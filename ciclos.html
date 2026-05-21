@@ -1,89 +1,148 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Ciclos</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <title>Gerenciar Ciclos</title>
 </head>
 <body>
 
-<div class="sidebar">
-    <h2>InsectFarmManager - MVP</h2>
-    <ul>
-        <li onclick="window.location.href='dashboard.html'">Dashboard</li>
-        <li onclick="window.location.href='lotes.html'">Lotes</li>
-        <li onclick="window.location.href='ciclos.html'">Ciclos</li>
-        <li onclick="window.location.href='monitoramento.html'">Monitoramento</li>
-        <li onclick="window.location.href='rendimento.html'">Rendimento</li>
-    </ul>
-</div>
+  <h2>Gerenciar Ciclos</h2>
 
-<div class="content">
-<h2>Ciclos Biológicos</h2>
+  <a href="dashboard.html">⬅ Voltar ao Dashboard</a>
+  <br><br>
 
-<label>Lote:</label>
-<select id="lote"></select>
+  <h3>Novo Ciclo</h3>
 
-<label>Data:</label>
-<input type="date" id="dataCiclo">
+  <label>Lote:</label><br>
+  <select id="selectLote"></select><br><br>
 
-<label>Bandeja:</label>
-<select id="bandeja"></select>
+  <label>Data do Ciclo:</label><br>
+  <input id="dataCiclo" type="date"><br><br>
 
-<label>Estágio:</label>
-<select id="estagio">
-  <option value="larval">Larval</option>
-  <option value="pupa">Pupa</option>
-  <option value="adulto">Adulto</option>
-</select>
+  <label>Descrição:</label><br>
+  <input id="descricao" type="text" placeholder="Ex: Alimentação, Limpeza, Transferência"><br><br>
 
-<button id="btnSalvarCiclo">Salvar</button>
-</div>
+  <button id="btnSalvar">Salvar Ciclo</button>
 
-<script>
-let user = JSON.parse(localStorage.getItem("usuarioLogado"));
-if (!user) window.location.href = "login.html";
+  <hr>
 
-let lotes = JSON.parse(localStorage.getItem("lotes")) || [];
-let ciclos = JSON.parse(localStorage.getItem("ciclos")) || [];
+  <h3>Ciclos Registrados</h3>
+  <table border="1" cellpadding="5">
+    <thead>
+      <tr>
+        <th>Lote</th>
+        <th>Data</th>
+        <th>Descrição</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody id="listaCiclos"></tbody>
+  </table>
 
-function carregarLotes() {
-    lote.innerHTML = "";
-    lotes.forEach(l => {
-        lote.innerHTML += `<option value="${l.id}">Lote ${l.id}</option>`;
-    });
-    carregarBandejas();
-}
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+      getFirestore, collection, addDoc, getDocs, deleteDoc, doc 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-function carregarBandejas() {
-    let l = lotes.find(x => x.id == lote.value);
-    bandeja.innerHTML = "";
-    for (let i = 1; i <= l.bandejas; i++) {
-        bandeja.innerHTML += `<option value="${i}">Bandeja ${i}</option>`;
+    const firebaseConfig = {
+      apiKey: "AIzaSyBd-iIfDpxpjmrISWZMw_0-sVE9Fj0_C5M",
+      authDomain: "insectfarmmanager.firebaseapp.com",
+      projectId: "insectfarmmanager",
+      storageBucket: "insectfarmmanager.firebasestorage.app",
+      messagingSenderId: "478537152748",
+      appId: "1:478537152748:web:b5e8217930bd9a5e550dc9",
+      measurementId: "G-47ZZLQSJVD"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const selectLote = document.getElementById("selectLote");
+    const lista = document.getElementById("listaCiclos");
+
+    // CARREGAR LOTES NO SELECT
+    async function carregarLotes() {
+      selectLote.innerHTML = "";
+
+      const snapshot = await getDocs(collection(db, "lotes"));
+
+      snapshot.forEach((docItem) => {
+        const item = docItem.data();
+
+        const option = document.createElement("option");
+        option.value = docItem.id;
+        option.textContent = `${item.data} - ${item.bandejas} bandejas`;
+
+        selectLote.appendChild(option);
+      });
     }
-}
 
-lote.onchange = carregarBandejas;
+    // SALVAR CICLO
+    document.getElementById("btnSalvar").onclick = async function () {
+      const loteId = selectLote.value;
+      const data = dataCiclo.value;
+      const desc = descricao.value.trim();
 
-document.getElementById("btnSalvarCiclo").onclick = function () {
-    if (!dataCiclo.value) {
-        alert("Selecione uma data");
+      if (!loteId || !data || !desc) {
+        alert("Preencha todos os campos");
         return;
+      }
+
+      await addDoc(collection(db, "ciclos"), {
+        loteId: loteId,
+        data: data,
+        descricao: desc
+      });
+
+      alert("Ciclo registrado com sucesso!");
+      carregarCiclos();
+    };
+
+    // LISTAR CICLOS
+    async function carregarCiclos() {
+      lista.innerHTML = "";
+
+      const snapshot = await getDocs(collection(db, "ciclos"));
+      const lotesSnapshot = await getDocs(collection(db, "lotes"));
+
+      // Mapa para buscar nome do lote
+      const lotesMap = {};
+      lotesSnapshot.forEach((l) => {
+        lotesMap[l.id] = l.data();
+      });
+
+      snapshot.forEach((docItem) => {
+        const item = docItem.data();
+
+        const tr = document.createElement("tr");
+
+        tr.innerHTML = `
+          <td>${lotesMap[item.loteId]?.data || "Lote removido"}</td>
+          <td>${item.data}</td>
+          <td>${item.descricao}</td>
+          <td>
+            <button onclick="excluirCiclo('${docItem.id}')">Excluir</button>
+          </td>
+        `;
+
+        lista.appendChild(tr);
+      });
     }
 
-    ciclos.push({
-        lote: Number(lote.value),
-        data: dataCiclo.value,
-        bandeja: Number(bandeja.value),
-        estagio: estagio.value
-    });
+    // EXCLUIR CICLO
+    window.excluirCiclo = async function (id) {
+      if (confirm("Deseja realmente excluir este ciclo?")) {
+        await deleteDoc(doc(db, "ciclos", id));
+        carregarCiclos();
+      }
+    };
 
-    localStorage.setItem("ciclos", JSON.stringify(ciclos));
-    alert("Ciclo registrado!");
-};
-
-carregarLotes();
-</script>
+    // Carrega ao abrir a página
+    carregarLotes();
+    carregarCiclos();
+  </script>
 
 </body>
 </html>
