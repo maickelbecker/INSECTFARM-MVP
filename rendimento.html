@@ -16,16 +16,9 @@
 
     <h3>Novo Registro de Rendimento</h3>
 
-    <label>Lote:</label>
     <select id="selectLote"></select>
-
-    <label>Peso Final (kg):</label>
-    <input id="peso" type="number" step="0.01">
-
-    <label>Mortalidade (%):</label>
-    <input id="mortalidade" type="number" step="0.1">
-
-    <label>Data do Registro:</label>
+    <input id="peso" type="number" step="0.01" placeholder="Peso final (kg)">
+    <input id="mortalidade" type="number" step="0.1" placeholder="Mortalidade (%)">
     <input id="dataRegistro" type="date">
 
     <button id="btnSalvar">Salvar Rendimento</button>
@@ -136,7 +129,7 @@
           <td>${item.mortalidade}%</td>
           <td>${item.data}</td>
           <td>
-            <button onclick="excluirRendimento('${docItem.id}')" style="background:#d9534f;">Excluir</button>
+            <button class="red" onclick="excluirRendimento('${docItem.id}')">Excluir</button>
           </td>
         `;
 

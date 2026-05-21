@@ -16,16 +16,9 @@
 
     <h3>Novo Registro</h3>
 
-    <label>Lote:</label>
     <select id="selectLote"></select>
-
-    <label>Temperatura (°C):</label>
-    <input id="temperatura" type="number" step="0.1">
-
-    <label>Umidade (%):</label>
-    <input id="umidade" type="number" step="0.1">
-
-    <label>Data do Registro:</label>
+    <input id="temperatura" type="number" step="0.1" placeholder="Temperatura (°C)">
+    <input id="umidade" type="number" step="0.1" placeholder="Umidade (%)">
     <input id="dataRegistro" type="date">
 
     <button id="btnSalvar">Salvar Registro</button>
@@ -136,7 +129,7 @@
           <td>${item.umidade}%</td>
           <td>${item.data}</td>
           <td>
-            <button onclick="excluirRegistro('${docItem.id}')" style="background:#d9534f;">Excluir</button>
+            <button class="red" onclick="excluirRegistro('${docItem.id}')">Excluir</button>
           </td>
         `;
 

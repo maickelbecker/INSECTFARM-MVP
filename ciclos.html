@@ -16,14 +16,9 @@
 
     <h3>Novo Ciclo</h3>
 
-    <label>Lote:</label>
     <select id="selectLote"></select>
-
-    <label>Data do Ciclo:</label>
-    <input id="dataCiclo" type="date">
-
-    <label>Descrição:</label>
-    <input id="descricao" type="text" placeholder="Ex: Alimentação, Limpeza, Transferência">
+    <input id="dataCiclo" type="date" placeholder="Data do ciclo">
+    <input id="descricao" type="text" placeholder="Descrição (ex: Alimentação, Limpeza...)">
 
     <button id="btnSalvar">Salvar Ciclo</button>
 
@@ -129,7 +124,7 @@
           <td>${item.data}</td>
           <td>${item.descricao}</td>
           <td>
-            <button onclick="excluirCiclo('${docItem.id}')" style="background:#d9534f;">Excluir</button>
+            <button class="red" onclick="excluirCiclo('${docItem.id}')">Excluir</button>
           </td>
         `;
 

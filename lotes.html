@@ -16,11 +16,8 @@
 
     <h3>Novo Lote</h3>
 
-    <label>Data do Lote:</label>
-    <input id="dataLote" type="date">
-
-    <label>Quantidade de Bandejas:</label>
-    <input id="qtdBandejas" type="number" min="1">
+    <input id="dataLote" type="date" placeholder="Data do lote">
+    <input id="qtdBandejas" type="number" min="1" placeholder="Quantidade de bandejas">
 
     <button id="btnSalvar">Salvar Lote</button>
 
@@ -97,7 +94,7 @@
           <td>${item.data}</td>
           <td>${item.bandejas}</td>
           <td>
-            <button onclick="excluirLote('${docItem.id}')" style="background:#d9534f;">Excluir</button>
+            <button class="red" onclick="excluirLote('${docItem.id}')">Excluir</button>
           </td>
         `;
 
