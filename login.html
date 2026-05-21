@@ -3,19 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <title>Login</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <h2>Login</h2>
+  <div class="container">
 
-  <input id="usuario" type="text" placeholder="Usuário"><br><br>
-  <input id="senha" type="password" placeholder="Senha"><br><br>
+    <h2>Login</h2>
 
-  <button id="btnEntrar">Entrar</button>
-  <br><br>
+    <input id="usuario" type="text" placeholder="Usuário">
+    <input id="senha" type="password" placeholder="Senha">
 
-  <a href="cadastro.html">Criar Conta</a><br>
-  <a href="index.html">Voltar ao Início</a>
+    <button id="btnEntrar">Entrar</button>
+
+    <br><br>
+    <a href="cadastro.html">Criar Conta</a><br>
+    <a href="index.html">Voltar ao Início</a>
+
+  </div>
 
   <!-- Firebase -->
   <script type="module">
@@ -36,7 +41,6 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // LOGIN
     document.getElementById("btnEntrar").onclick = async function () {
       const user = usuario.value.trim();
       const pass = senha.value.trim();
@@ -59,10 +63,7 @@
         return;
       }
 
-      // Salva o usuário logado localmente
       localStorage.setItem("usuarioLogado", user);
-
-      // Redireciona
       window.location.href = "dashboard.html";
     };
   </script>
