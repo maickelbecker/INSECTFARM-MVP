@@ -3,41 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <title>Gerenciar Ciclos</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <h2>Gerenciar Ciclos</h2>
+  <div class="container">
 
-  <a href="dashboard.html">⬅ Voltar ao Dashboard</a>
-  <br><br>
+    <h2>Gerenciar Ciclos</h2>
 
-  <h3>Novo Ciclo</h3>
+    <button onclick="window.location.href='dashboard.html'">⬅ Voltar</button>
+    <br><br>
 
-  <label>Lote:</label><br>
-  <select id="selectLote"></select><br><br>
+    <h3>Novo Ciclo</h3>
 
-  <label>Data do Ciclo:</label><br>
-  <input id="dataCiclo" type="date"><br><br>
+    <label>Lote:</label>
+    <select id="selectLote"></select>
 
-  <label>Descrição:</label><br>
-  <input id="descricao" type="text" placeholder="Ex: Alimentação, Limpeza, Transferência"><br><br>
+    <label>Data do Ciclo:</label>
+    <input id="dataCiclo" type="date">
 
-  <button id="btnSalvar">Salvar Ciclo</button>
+    <label>Descrição:</label>
+    <input id="descricao" type="text" placeholder="Ex: Alimentação, Limpeza, Transferência">
 
-  <hr>
+    <button id="btnSalvar">Salvar Ciclo</button>
 
-  <h3>Ciclos Registrados</h3>
-  <table border="1" cellpadding="5">
-    <thead>
-      <tr>
-        <th>Lote</th>
-        <th>Data</th>
-        <th>Descrição</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody id="listaCiclos"></tbody>
-  </table>
+    <hr>
+
+    <h3>Ciclos Registrados</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Lote</th>
+          <th>Data</th>
+          <th>Descrição</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="listaCiclos"></tbody>
+    </table>
+
+  </div>
 
   <!-- Firebase -->
   <script type="module">
@@ -123,7 +129,7 @@
           <td>${item.data}</td>
           <td>${item.descricao}</td>
           <td>
-            <button onclick="excluirCiclo('${docItem.id}')">Excluir</button>
+            <button onclick="excluirCiclo('${docItem.id}')" style="background:#d9534f;">Excluir</button>
           </td>
         `;
 

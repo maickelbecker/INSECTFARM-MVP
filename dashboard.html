@@ -3,23 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <title>Dashboard</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <h2>Bem-vindo ao InsectFarmManager</h2>
+  <div class="container">
 
-  <p id="usuarioNome"></p>
+    <h2>Bem-vindo ao InsectFarmManager</h2>
 
-  <h3>Menu</h3>
-  <ul>
-    <li><a href="lotes.html">Gerenciar Lotes</a></li>
-    <li><a href="ciclos.html">Gerenciar Ciclos</a></li>
-    <li><a href="monitoramento.html">Monitoramento</a></li>
-    <li><a href="rendimento.html">Rendimento</a></li>
-  </ul>
+    <p id="usuarioNome"></p>
 
-  <br>
-  <button id="btnSair">Sair</button>
+    <h3>Menu</h3>
+
+    <button onclick="window.location.href='lotes.html'">Gerenciar Lotes</button>
+    <button onclick="window.location.href='ciclos.html'">Gerenciar Ciclos</button>
+    <button onclick="window.location.href='monitoramento.html'">Monitoramento</button>
+    <button onclick="window.location.href='rendimento.html'">Rendimento</button>
+
+    <br><br>
+    <button id="btnSair" style="background:#d9534f;">Sair</button>
+
+  </div>
 
   <!-- Firebase -->
   <script type="module">

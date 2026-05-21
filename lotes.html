@@ -3,37 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <title>Gerenciar Lotes</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <h2>Gerenciar Lotes</h2>
+  <div class="container">
 
-  <a href="dashboard.html">⬅ Voltar ao Dashboard</a>
-  <br><br>
+    <h2>Gerenciar Lotes</h2>
 
-  <h3>Novo Lote</h3>
+    <button onclick="window.location.href='dashboard.html'">⬅ Voltar</button>
+    <br><br>
 
-  <label>Data do Lote:</label><br>
-  <input id="dataLote" type="date"><br><br>
+    <h3>Novo Lote</h3>
 
-  <label>Quantidade de Bandejas:</label><br>
-  <input id="qtdBandejas" type="number" min="1"><br><br>
+    <label>Data do Lote:</label>
+    <input id="dataLote" type="date">
 
-  <button id="btnSalvar">Salvar Lote</button>
+    <label>Quantidade de Bandejas:</label>
+    <input id="qtdBandejas" type="number" min="1">
 
-  <hr>
+    <button id="btnSalvar">Salvar Lote</button>
 
-  <h3>Lotes Cadastrados</h3>
-  <table border="1" cellpadding="5">
-    <thead>
-      <tr>
-        <th>Data</th>
-        <th>Bandejas</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody id="listaLotes"></tbody>
-  </table>
+    <hr>
+
+    <h3>Lotes Cadastrados</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Bandejas</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="listaLotes"></tbody>
+    </table>
+
+  </div>
 
   <!-- Firebase -->
   <script type="module">
@@ -91,7 +97,7 @@
           <td>${item.data}</td>
           <td>${item.bandejas}</td>
           <td>
-            <button onclick="excluirLote('${docItem.id}')">Excluir</button>
+            <button onclick="excluirLote('${docItem.id}')" style="background:#d9534f;">Excluir</button>
           </td>
         `;
 

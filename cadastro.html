@@ -2,26 +2,32 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Cadastro</title>
+  <title>Criar Conta</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <h2>Criar Conta</h2>
+  <div class="container">
 
-  <input id="usuario" type="text" placeholder="Usuário"><br><br>
-  <input id="senha" type="password" placeholder="Senha"><br><br>
+    <h2>Criar Conta</h2>
 
-  <button id="btnCadastrar">Cadastrar</button>
-  <br><br>
+    <input id="usuario" type="text" placeholder="Usuário">
+    <input id="senha" type="password" placeholder="Senha">
 
-  <a href="login.html">Voltar ao Login</a><br>
-  <a href="index.html">Voltar ao Início</a>
+    <button id="btnCadastrar">Cadastrar</button>
+
+    <br><br>
+    <a href="login.html">Voltar ao Login</a><br>
+    <a href="index.html">Voltar ao Início</a>
+
+  </div>
 
   <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, where, getDocs }
-      from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { 
+      getFirestore, collection, addDoc, query, where, getDocs 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBd-iIfDpxpjmrISWZMw_0-sVE9Fj0_C5M",
@@ -36,7 +42,6 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // CADASTRO
     document.getElementById("btnCadastrar").onclick = async function () {
       const user = usuario.value.trim();
       const pass = senha.value.trim();
