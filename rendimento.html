@@ -4,151 +4,320 @@
   <meta charset="UTF-8">
   <title>Rendimento da Produção</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 220px;
+      height: 100vh;
+      background: #343a40;
+      padding: 20px;
+      color: white;
+    }
+    .sidebar h2 { text-align:center; margin-bottom:20px; }
+    .sidebar ul { list-style:none; padding:0; }
+    .sidebar li {
+      padding:12px; margin-bottom:8px; background:#495057;
+      border-radius:6px; cursor:pointer; text-align:center;
+    }
+    .sidebar li:hover { background:#6c757d; }
+
+    .content {
+      margin-left:260px; padding:20px;
+      width:calc(100% - 260px);
+    }
+
+    .cards {
+      display:grid; grid-template-columns:1fr 1fr;
+      gap:20px; margin-top:20px;
+    }
+
+    .card {
+      background:white; padding:20px; border-radius:12px;
+      box-shadow:0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    .full-width { width:100%; margin-bottom:10px; }
+
+    table {
+      width:100%;
+      border-collapse:collapse;
+      margin-top:15px;
+    }
+    th, td {
+      padding:8px;
+      border-bottom:1px solid #ddd;
+      text-align:left;
+    }
+    .tag {
+      display:inline-block;
+      padding:2px 8px;
+      border-radius:10px;
+      font-size:12px;
+      background:#e9ecef;
+    }
+    .btn-red {
+      background:#dc3545;
+      color:white;
+      border:none;
+      padding:4px 8px;
+      border-radius:4px;
+      cursor:pointer;
+    }
+    .btn-red:hover { background:#b02a37; }
+  </style>
 </head>
 <body>
 
-  <div class="container">
+<div class="sidebar">
+  <h2>InsectFarmManager</h2>
+  <ul>
+    <li onclick="window.location.href='dashboard.html'">Dashboard</li>
+    <li onclick="window.location.href='lotes.html'">Lotes</li>
+    <li onclick="window.location.href='ciclos.html'">Ciclos</li>
+    <li onclick="window.location.href='monitoramento.html'">Monitoramento</li>
+    <li onclick="window.location.href='rendimento.html'">Rendimento</li>
+    <li onclick="window.location.href='estimativa.html'">Estimativa</li>
+  </ul>
+</div>
 
-    <h2>Rendimento da Produção</h2>
+<div class="content">
+  <h1>Rendimento da Produção</h1>
 
-    <button onclick="window.location.href='dashboard.html'">⬅ Voltar</button>
-    <br><br>
+  <div class="cards">
+    <div class="card">
+      <h3>Novo Registro de Rendimento</h3>
 
-    <h3>Novo Registro de Rendimento</h3>
+      <label>Lote</label>
+      <select id="selectLote" class="full-width"></select>
 
-    <select id="selectLote"></select>
-    <input id="peso" type="number" step="0.01" placeholder="Peso final (kg)">
-    <input id="mortalidade" type="number" step="0.1" placeholder="Mortalidade (%)">
-    <input id="dataRegistro" type="date">
+      <label>Bandeja</label>
+      <select id="selectBandeja" class="full-width"></select>
 
-    <button id="btnSalvar">Salvar Rendimento</button>
+      <label>Data do Registro</label>
+      <input id="dataRegistro" type="date" class="full-width">
 
-    <hr>
+      <label>Peso vivo total (g)</label>
+      <input id="pesoVivo" type="number" step="0.01" class="full-width" placeholder="Ex: 1000">
 
-    <h3>Histórico de Rendimento</h3>
+      <label>Peso seco (g)</label>
+      <input id="pesoSeco" type="number" step="0.01" class="full-width" placeholder="Ex: 400">
 
-    <table>
-      <thead>
-        <tr>
-          <th>Lote</th>
-          <th>Peso Final</th>
-          <th>Mortalidade</th>
-          <th>Data</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody id="listaRendimento"></tbody>
-    </table>
+      <label>Taxa de crescimento larval (%)</label>
+      <input id="taxaCrescimento" type="number" step="0.01" class="full-width" placeholder="Ex: 10">
 
+      <label>Quantidade de ração (g)</label>
+      <input id="racao" type="number" step="0.01" class="full-width" placeholder="Ex: 50">
+
+      <label>Momento do registro</label>
+      <select id="momento" class="full-width">
+        <option value="">Selecione...</option>
+        <option value="inicio">Início do ciclo larval</option>
+        <option value="meio">Meio do ciclo</option>
+        <option value="pre-colheita">Pré-colheita</option>
+        <option value="colheita">Colheita</option>
+      </select>
+
+      <label>Temperatura (°C)</label>
+      <input id="temperatura" type="number" step="0.1" class="full-width" placeholder="Ex: 27.5">
+
+      <label>Umidade relativa (%)</label>
+      <input id="umidade" type="number" step="0.1" class="full-width" placeholder="Ex: 65">
+
+      <label>Observações</label>
+      <textarea id="observacoes" class="full-width" rows="3" placeholder="Anotações importantes sobre o lote, condições, etc."></textarea>
+
+      <button id="btnSalvar" class="full-width">Salvar Rendimento</button>
+    </div>
+
+    <div class="card">
+      <h3>Resumo do Último Registro</h3>
+      <div id="resumoUltimo">Nenhum registro ainda.</div>
+    </div>
   </div>
 
-  <!-- Firebase -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { 
-      getFirestore, collection, addDoc, getDocs, deleteDoc, doc 
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  <h3>Registros de Rendimento</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Lote</th>
+        <th>Bandeja</th>
+        <th>Data</th>
+        <th>Peso vivo / seco</th>
+        <th>Crescimento</th>
+        <th>Ração</th>
+        <th>Ambiente</th>
+        <th>Momento</th>
+        <th>Registrado em</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody id="listaRendimento"></tbody>
+  </table>
+</div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBd-iIfDpxpjmrISWZMw_0-sVE9Fj0_C5M",
-      authDomain: "insectfarmmanager.firebaseapp.com",
-      projectId: "insectfarmmanager",
-      storageBucket: "insectfarmmanager.firebasestorage.app",
-      messagingSenderId: "478537152748",
-      appId: "1:478537152748:web:b5e8217930bd9a5e550dc9",
-      measurementId: "G-47ZZLQSJVD"
-    };
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getFirestore, collection, addDoc, getDocs, deleteDoc, doc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+const firebaseConfig = {
+  apiKey: "AIzaSyBd-iIfDpxpjmrISWZMw_0-sVE9Fj0_C5M",
+  authDomain: "insectfarmmanager.firebaseapp.com",
+  projectId: "insectfarmmanager",
+  storageBucket: "insectfarmmanager.firebasestorage.app",
+  messagingSenderId: "478537152748",
+  appId: "1:478537152748:web:b5e8217930bd9a5e550dc9",
+  measurementId: "G-47ZZLQSJVD"
+};
 
-    const selectLote = document.getElementById("selectLote");
-    const lista = document.getElementById("listaRendimento");
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-    // CARREGAR LOTES NO SELECT
-    async function carregarLotes() {
-      selectLote.innerHTML = "";
+const selectLote = document.getElementById("selectLote");
+const selectBandeja = document.getElementById("selectBandeja");
+const lista = document.getElementById("listaRendimento");
+const resumoUltimo = document.getElementById("resumoUltimo");
 
-      const snapshot = await getDocs(collection(db, "lotes"));
+async function carregarLotes() {
+  selectLote.innerHTML = "";
+  const snapshot = await getDocs(collection(db, "lotes"));
 
-      snapshot.forEach((docItem) => {
-        const item = docItem.data();
+  snapshot.forEach(docItem => {
+    const item = docItem.data();
+    const option = document.createElement("option");
+    option.value = docItem.id;
+    option.textContent = `${item.data} - ${item.bandejas} bandejas`;
+    selectLote.appendChild(option);
+  });
 
-        const option = document.createElement("option");
-        option.value = docItem.id;
-        option.textContent = `${item.data} - ${item.bandejas} bandejas`;
+  if (selectLote.value) carregarBandejasDoLote();
+}
 
-        selectLote.appendChild(option);
-      });
-    }
+async function carregarBandejasDoLote() {
+  const loteId = selectLote.value;
+  if (!loteId) return;
 
-    // SALVAR RENDIMENTO
-    document.getElementById("btnSalvar").onclick = async function () {
-      const loteId = selectLote.value;
-      const pesoFinal = peso.value;
-      const mort = mortalidade.value;
-      const data = dataRegistro.value;
+  const snapshot = await getDocs(collection(db, "lotes"));
+  selectBandeja.innerHTML = "";
 
-      if (!loteId || !pesoFinal || !mort || !data) {
-        alert("Preencha todos os campos");
-        return;
+  snapshot.forEach(docItem => {
+    if (docItem.id === loteId) {
+      const dados = docItem.data();
+      for (let i = 1; i <= dados.bandejas; i++) {
+        const opt = document.createElement("option");
+        opt.value = i;
+        opt.textContent = "Bandeja " + i;
+        selectBandeja.appendChild(opt);
       }
-
-      await addDoc(collection(db, "rendimento"), {
-        loteId: loteId,
-        pesoFinal: Number(pesoFinal),
-        mortalidade: Number(mort),
-        data: data
-      });
-
-      alert("Rendimento registrado com sucesso!");
-      carregarRendimento();
-    };
-
-    // LISTAR RENDIMENTO
-    async function carregarRendimento() {
-      lista.innerHTML = "";
-
-      const snapshot = await getDocs(collection(db, "rendimento"));
-      const lotesSnapshot = await getDocs(collection(db, "lotes"));
-
-      // Mapa para buscar nome do lote
-      const lotesMap = {};
-      lotesSnapshot.forEach((l) => {
-        lotesMap[l.id] = l.data();
-      });
-
-      snapshot.forEach((docItem) => {
-        const item = docItem.data();
-
-        const tr = document.createElement("tr");
-
-        tr.innerHTML = `
-          <td>${lotesMap[item.loteId]?.data || "Lote removido"}</td>
-          <td>${item.pesoFinal} kg</td>
-          <td>${item.mortalidade}%</td>
-          <td>${item.data}</td>
-          <td>
-            <button class="red" onclick="excluirRendimento('${docItem.id}')">Excluir</button>
-          </td>
-        `;
-
-        lista.appendChild(tr);
-      });
     }
+  });
+}
 
-    // EXCLUIR RENDIMENTO
-    window.excluirRendimento = async function (id) {
-      if (confirm("Deseja realmente excluir este registro?")) {
-        await deleteDoc(doc(db, "rendimento", id));
-        carregarRendimento();
-      }
-    };
+selectLote.onchange = carregarBandejasDoLote;
 
-    // Carrega ao abrir a página
-    carregarLotes();
+document.getElementById("btnSalvar").onclick = async function () {
+  const loteId = selectLote.value;
+  const bandeja = Number(selectBandeja.value);
+  const dataRegistro = document.getElementById("dataRegistro").value;
+  const pesoVivo = Number(document.getElementById("pesoVivo").value);
+  const pesoSeco = Number(document.getElementById("pesoSeco").value);
+  const taxaCrescimento = Number(document.getElementById("taxaCrescimento").value);
+  const racao = Number(document.getElementById("racao").value);
+  const momento = document.getElementById("momento").value;
+  const temperatura = Number(document.getElementById("temperatura").value || 0);
+  const umidade = Number(document.getElementById("umidade").value || 0);
+  const observacoes = document.getElementById("observacoes").value.trim();
+
+  if (!loteId || !bandeja || !dataRegistro || !pesoVivo || !pesoSeco || !taxaCrescimento || !racao || !momento) {
+    alert("Preencha todos os campos obrigatórios.");
+    return;
+  }
+
+  const criadoEm = new Date().toLocaleString("pt-BR");
+
+  await addDoc(collection(db, "rendimento"), {
+    loteId,
+    bandeja,
+    dataRegistro,
+    pesoVivo,
+    pesoSeco,
+    taxaCrescimento,
+    racao,
+    momento,
+    temperatura,
+    umidade,
+    observacoes,
+    criadoEm
+  });
+
+  resumoUltimo.innerHTML = `
+    <p><strong>Lote:</strong> ${selectLote.options[selectLote.selectedIndex].text}</p>
+    <p><strong>Bandeja:</strong> ${bandeja}</p>
+    <p><strong>Data:</strong> ${dataRegistro}</p>
+    <p><strong>Peso vivo / seco:</strong> ${pesoVivo} g / ${pesoSeco} g</p>
+    <p><strong>Crescimento:</strong> ${taxaCrescimento}%</p>
+    <p><strong>Ração:</strong> ${racao} g</p>
+    <p><strong>Ambiente:</strong> ${temperatura} °C / ${umidade}%</p>
+    <p><strong>Momento:</strong> ${momento}</p>
+    ${observacoes ? `<p><strong>Obs:</strong> ${observacoes}</p>` : ""}
+    <p><small>Registrado em: ${criadoEm}</small></p>
+  `;
+
+  alert("Rendimento registrado com sucesso!");
+  carregarRendimento();
+};
+
+async function carregarRendimento() {
+  lista.innerHTML = "";
+
+  const snapshot = await getDocs(collection(db, "rendimento"));
+  const lotesSnapshot = await getDocs(collection(db, "lotes"));
+
+  const lotesMap = {};
+  lotesSnapshot.forEach(l => lotesMap[l.id] = l.data());
+
+  const registros = [];
+  snapshot.forEach(docItem => {
+    registros.push({ id: docItem.id, ...docItem.data() });
+  });
+
+  registros.sort((a, b) => (a.dataRegistro || "").localeCompare(b.dataRegistro || ""));
+
+  registros.forEach(item => {
+    const tr = document.createElement("tr");
+
+    const loteLabel = lotesMap[item.loteId]?.data || "Lote removido";
+
+    tr.innerHTML = `
+      <td>${loteLabel}</td>
+      <td>${item.bandeja}</td>
+      <td>${item.dataRegistro}</td>
+      <td>${item.pesoVivo} g / ${item.pesoSeco} g</td>
+      <td>${item.taxaCrescimento}%</td>
+      <td>${item.racao} g</td>
+      <td>${item.temperatura || 0} °C / ${item.umidade || 0}%</td>
+      <td><span class="tag">${item.momento}</span></td>
+      <td>${item.criadoEm || "-"}</td>
+      <td><button class="btn-red" onclick="excluirRendimento('${item.id}')">Excluir</button></td>
+    `;
+
+    lista.appendChild(tr);
+  });
+}
+
+window.excluirRendimento = async function (id) {
+  if (confirm("Deseja realmente excluir este registro?")) {
+    await deleteDoc(doc(db, "rendimento", id));
     carregarRendimento();
-  </script>
+  }
+};
+
+carregarLotes();
+carregarRendimento();
+</script>
 
 </body>
 </html>
