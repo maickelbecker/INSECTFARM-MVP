@@ -1,5 +1,3 @@
-/* ======== LAYOUT GERAL ======== */
-
 body {
   margin: 0;
   padding: 0;
@@ -9,8 +7,7 @@ body {
   min-height: 100vh;
 }
 
-/* ======== SIDEBAR ======== */
-
+/* SIDEBAR */
 .sidebar {
   width: 180px;
   background: #0a3d62;
@@ -74,8 +71,7 @@ body {
   background: #dff0ff;
 }
 
-/* ======== CONTEÚDO ======== */
-
+/* CONTEÚDO */
 .content {
   flex: 1;
   padding: 20px;
@@ -86,8 +82,7 @@ body {
   margin-bottom: 20px;
 }
 
-/* ======== CARDS DO MENU ======== */
-
+/* CARDS */
 .cards {
   display: flex;
   flex-wrap: wrap;
