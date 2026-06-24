@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Relatório de Estimativas</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+
+    button {
+      padding: 10px 20px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Relatório Completo de Estimativas</h1>
+<button onclick="window.print()">Imprimir Relatório</button>
+
+<div class="card">
+  <h2>Resumo Geral</h2>
+  <p id="resumoGeral">Carregando...</p>
+</div>
+
+<div class="card">
+  <h2>Gráfico de Lucro ao Longo do Tempo</h2>
+  <canvas id="graficoRelatorio"></canvas>
+</div>
+
+<div class="card">
+  <h2>Tabela Completa de Estimativas</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Lote</th>
+        <th>Bandeja</th>
+        <th>Data</th>
+        <th>Peso Final (kg)</th>
+        <th>Custo Total (R$)</th>
+        <th>Lucro (R$)</th>
+      </tr>
+    </thead>
+    <tbody id="tabelaEstimativas"></tbody>
+  </table>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import {
+  getFirestore, collection, getDocs
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBd-iIfDpxpjmrISWZMw_0-sVE9Fj0_C5M",
+  authDomain: "insectfarmmanager.firebaseapp.com",
+  projectId: "insectfarmmanager",
+  storageBucket: "insectfarmmanager.firebasestorage.app",
+  messagingSenderId: "478537152748",
+  appId: "1:478537152748:web:b5e8217930bd9a5e550dc9",
+  measurementId: "G-47ZZLQSJVD"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const tabela = document.getElementById("tabelaEstimativas");
+const resumoGeral = document.getElementById("resumoGeral");
+
+let grafico = null;
+
+async function carregarRelatorio() {
+  const estimativasSnap = await getDocs(collection(db, "estimativas"));
+  const lotesSnap = await getDocs(collection(db, "lotes"));
+
+  const lotesMap = {};
+  lotesSnap.forEach(l => lotesMap[l.id] = l.data());
+
+  let totalLucro = 0;
+  let totalCusto = 0;
+  let totalPeso = 0;
+
+  const dadosGrafico = [];
+
+  estimativasSnap.forEach(docItem => {
+    const item = docItem.data();
+
+    totalLucro += item.lucroEstimado;
+    totalCusto += item.custoTotal;
+    totalPeso += item.pesoFinal;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${lotesMap[item.loteId]?.data || "Lote removido"}</td>
+      <td>${item.bandeja}</td>
+      <td>${item.data}</td>
+      <td>${item.pesoFinal}</td>
+      <td>R$ ${item.custoTotal.toFixed(2)}</td>
+      <td>R$ ${item.lucroEstimado.toFixed(2)}</td>
+    `;
+    tabela.appendChild(tr);
+
+    dadosGrafico.push({
+      data: item.data,
+      lucro: item.lucroEstimado
+    });
+  });
+
+  resumoGeral.innerHTML = `
+    <p><strong>Total de peso produzido:</strong> ${totalPeso} kg</p>
+    <p><strong>Total de custos:</strong> R$ ${totalCusto.toFixed(2)}</p>
+    <p><strong>Total de lucro estimado:</strong> R$ ${totalLucro.toFixed(2)}</p>
+  `;
+
+  gerarGrafico(dadosGrafico);
+}
+
+function gerarGrafico(dados) {
+  const ctx = document.getElementById("graficoRelatorio").getContext("2d");
+
+  if (grafico) grafico.destroy();
+
+  grafico = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: dados.map(d => d.data),
+      datasets: [{
+        label: "Lucro estimado (R$)",
+        data: dados.map(d => d.lucro),
+        borderColor: "rgba(75,192,192,1)",
+        backgroundColor: "rgba(75,192,192,0.2)",
+        tension: 0.2
+      }]
+    }
+  });
+}
+
+carregarRelatorio();
+</script>
+
+</body>
+</html>
