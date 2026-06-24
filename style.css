@@ -9,7 +9,7 @@ body {
 
 /* SIDEBAR */
 .sidebar {
-  width: 180px;
+  width: 200px;
   background: #0a3d62;
   padding: 20px 10px;
   display: flex;
@@ -20,7 +20,7 @@ body {
 .sidebar h2 {
   color: #fff;
   text-align: center;
-  font-size: 18px;
+  font-size: 20px;
   margin-bottom: 10px;
 }
 
@@ -59,12 +59,13 @@ body {
 
 .sidebar ul li {
   background: #fff;
-  padding: 10px;
+  padding: 12px;
   border-radius: 4px;
   text-align: center;
   cursor: pointer;
   border: 1px solid #0a3d62;
   color: #000;
+  font-size: 15px;
 }
 
 .sidebar ul li:hover {
