@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Estimativa de Gastos e Lucros</title>
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 220px;
+      height: 100vh;
+      background: #343a40;
+      padding: 20px;
+      color: white;
+    }
+    .sidebar h2 {
+      margin-bottom: 20px;
+      font-size: 20px;
+      text-align: center;
+    }
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+    .sidebar li {
+      padding: 12px;
+      margin-bottom: 8px;
+      background: #495057;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.2s;
+      text-align: center;
+    }
+    .sidebar li:hover {
+      background: #6c757d;
+    }
+    .content {
+      margin-left: 260px;
+      padding: 20px;
+      width: calc(100% - 260px);
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .card h3 {
+      margin-bottom: 10px;
+    }
+    .card button {
+      margin-top: 10px;
+      width: 100%;
+    }
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 8px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+    .full-width {
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <h2>InsectFarmManager</h2>
+    <ul>
+      <li onclick="window.location.href='dashboard.html'">Dashboard</li>
+      <li onclick="window.location.href='lotes.html'">Lotes</li>
+      <li onclick="window.location.href='ciclos.html'">Ciclos</li>
+      <li onclick="window.location.href='monitoramento.html'">Monitoramento</li>
+      <li onclick="window.location.href='rendimento.html'">Rendimento</li>
+      <li onclick="window.location.href='estimativa.html'">Estimativa</li>
+      <li onclick="sair()">Sair</li>
+    </ul>
+  </div>
+
+  <!-- CONTEÚDO -->
+  <div class="content">
+    <h1>Estimativa de Gastos e Lucros</h1>
+    <p id="usuarioNome"></p>
+
+    <div class="cards">
+      <div class="card">
+        <h3>Nova Estimativa</h3>
+
+        <label>Lote</label>
+        <select id="selectLote" class="full-width"></select>
+
+        <label>Bandeja</label>
+        <input id="bandeja" type="number" min="1" step="1" class="full-width" placeholder="Número da bandeja">
+
+        <label>Data</label>
+        <input id="dataEstimativa" type="date" class="full-width">
+
+        <hr>
+
+        <h4>Dados de custos</h4>
+
+        <input id="custoRacao" type="number" step="0.01" class="full-width" placeholder="Custo de ração por bandeja (R$)">
+        <input id="custoOperacional" type="number" step="0.01" class="full-width" placeholder="Custo operacional (R$)">
+        <input id="custoEnergia" type="number" step="0.01" class="full-width" placeholder="Custo de energia (R$)">
+
+        <hr>
+
+        <h4>Parâmetros de venda</h4>
+        <input id="precoKg" type="number" step="0.01" class="full-width" placeholder="Preço de venda por kg (R$)">
+
+        <button id="btnCalcular">Calcular e Salvar Estimativa</button>
+      </div>
+
+      <div class="card">
+        <h3>Resumo da Estimativa</h3>
+        <div id="resumoEstimativa">
+          <p>Selecione um lote e preencha os dados para ver o resumo.</p>
+        </div>
+
+        <hr>
+
+        <h3>Gráfico Temporal (Lucro x Data)</h3>
+        <canvas id="graficoLucro"></canvas>
+
+        <button id="btnRelatorio">Gerar Relatório Completo</button>
+      </div>
+    </div>
+
+    <h3>Histórico de Estimativas</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Lote</th>
+          <th>Bandeja</th>
+          <th>Data</th>
+          <th>Custo Total (R$)</th>
+          <th>Lucro Estimado (R$)</th>
+        </tr>
+      </thead>
+      <tbody id="listaEstimativas"></tbody>
+    </table>
+  </div>
+
+  <!-- Firebase + Lógica -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import {
+      getFirestore, collection, addDoc, getDocs, query, where
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBd-iIfDpxpjmrISWZMw_0-sVE9Fj0_C5M",
+      authDomain: "insectfarmmanager.firebaseapp.com",
+      projectId: "insectfarmmanager",
+      storageBucket: "insectfarmmanager.firebasestorage.app",
+      messagingSenderId: "478537152748",
+      appId: "1:478537152748:web:b5e8217930bd9a5e550dc9",
+      measurementId: "G-47ZZLQSJVD"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const usuarioLogado = localStorage.getItem("usuarioLogado");
+    if (!usuarioLogado) {
+      alert("Você precisa estar logado.");
+      window.location.href = "login.html";
+    } else {
+      document.getElementById("usuarioNome").innerText =
+        "Usuário: " + usuarioLogado;
+    }
+
+    window.sair = function () {
+      localStorage.removeItem("usuarioLogado");
+      window.location.href = "login.html";
+    };
+
+    const selectLote = document.getElementById("selectLote");
+    const listaEstimativas = document.getElementById("listaEstimativas");
+    const resumoEstimativa = document.getElementById("resumoEstimativa");
+
+    let graficoLucro = null;
+
+    async function carregarLotes() {
+      selectLote.innerHTML = "";
+      const snapshot = await getDocs(collection(db, "lotes"));
+      snapshot.forEach((docItem) => {
+        const item = docItem.data();
+        const option = document.createElement("option");
+        option.value = docItem.id;
+        option.textContent = `${item.data} - ${item.bandejas} bandejas`;
+        selectLote.appendChild(option);
+      });
+    }
+
+    async function carregarEstimativas() {
+      listaEstimativas.innerHTML = "";
+      const estimativasSnap = await getDocs(collection(db, "estimativas"));
+      const lotesSnap = await getDocs(collection(db, "lotes"));
+
+      const lotesMap = {};
+      lotesSnap.forEach((l) => {
+        lotesMap[l.id] = l.data();
+      });
+
+      const dadosGrafico = [];
+
+      estimativasSnap.forEach((docItem) => {
+        const item = docItem.data();
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${lotesMap[item.loteId]?.data || "Lote removido"}</td>
+          <td>${item.bandeja}</td>
+          <td>${item.data}</td>
+          <td>R$ ${item.custoTotal.toFixed(2)}</td>
+          <td>R$ ${item.lucroEstimado.toFixed(2)}</td>
+        `;
+        listaEstimativas.appendChild(tr);
+
+        dadosGrafico.push({
+          data: item.data,
+          lucro: item.lucroEstimado
+        });
+      });
+
+      atualizarGrafico(dadosGrafico);
+    }
+
+    function atualizarGrafico(dados) {
+      const ctx = document.getElementById("graficoLucro").getContext("2d");
+      const labels = dados.map(d => d.data);
+      const valores = dados.map(d => d.lucro);
+
+      if (graficoLucro) {
+        graficoLucro.destroy();
+      }
+
+      graficoLucro = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: labels,
+          datasets: [{
+            label: "Lucro estimado (R$)",
+            data: valores,
+            borderColor: "rgba(75, 192, 192, 1)",
+            backgroundColor: "rgba(75, 192, 192, 0.2)",
+            tension: 0.2
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    document.getElementById("btnCalcular").onclick = async function () {
+      const loteId = selectLote.value;
+      const bandeja = Number(document.getElementById("bandeja").value);
+      const data = document.getElementById("dataEstimativa").value;
+      const custoRacao = Number(document.getElementById("custoRacao").value);
+      const custoOperacional = Number(document.getElementById("custoOperacional").value || 0);
+      const custoEnergia = Number(document.getElementById("custoEnergia").value || 0);
+      const precoKg = Number(document.getElementById("precoKg").value);
+
+      if (!loteId || !bandeja || !data || !custoRacao || !precoKg) {
+        alert("Preencha pelo menos lote, bandeja, data, custo de ração e preço por kg.");
+        return;
+      }
+
+      const qRend = query(
+        collection(db, "rendimento"),
+        where("loteId", "==", loteId)
+      );
+      const rendSnap = await getDocs(qRend);
+
+      if (rendSnap.empty) {
+        alert("Não há dados de rendimento para este lote.");
+        return;
+      }
+
+      const rendDoc = rendSnap.docs[0].data();
+      const pesoFinal = rendDoc.pesoFinal || 0;
+      const mortalidade = rendDoc.mortalidade || 0;
+
+      const custoTotal = (custoRacao * bandeja) + custoOperacional + custoEnergia;
+      const receita = pesoFinal * precoKg;
+      const lucroEstimado = receita - custoTotal;
+      const lucroPorKg = pesoFinal > 0 ? lucroEstimado / pesoFinal : 0;
+      const lucroPorBandeja = bandeja > 0 ? lucroEstimado / bandeja : 0;
+
+      await addDoc(collection(db, "estimativas"), {
+        loteId,
+        bandeja,
+        data,
+        custoRacao,
+        custoOperacional,
+        custoEnergia,
+        custoTotal,
+        lucroEstimado,
+        lucroPorKg,
+        lucroPorBandeja,
+        pesoFinal,
+        mortalidade
+      });
+
+      resumoEstimativa.innerHTML = `
+        <p><strong>Lote:</strong> ${loteId}</p>
+        <p><strong>Bandeja:</strong> ${bandeja}</p>
+        <p><strong>Data:</strong> ${data}</p>
+        <p><strong>Peso final:</strong> ${pesoFinal} kg</p>
+        <p><strong>Mortalidade:</strong> ${mortalidade}%</p>
+        <p><strong>Custo total:</strong> R$ ${custoTotal.toFixed(2)}</p>
+        <p><strong>Receita estimada:</strong> R$ ${receita.toFixed(2)}</p>
+        <p><strong>Lucro estimado:</strong> R$ ${lucroEstimado.toFixed(2)}</p>
+        <p><strong>Lucro por kg:</strong> R$ ${lucroPorKg.toFixed(2)}</p>
+        <p><strong>Lucro por bandeja:</strong> R$ ${lucroPorBandeja.toFixed(2)}</p>
+      `;
+
+      alert("Estimativa salva com sucesso!");
+      carregarEstimativas();
+    };
+
+    document.getElementById("btnRelatorio").onclick = function () {
+      window.open("relatorio_estimativa.html", "_blank");
+    };
+
+    carregarLotes();
+    carregarEstimativas();
+  </script>
+
+</body>
+</html>
