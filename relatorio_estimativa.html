@@ -2,88 +2,70 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Relatório de Estimativas</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #f5f5f5;
-    }
-
-    h1, h2 {
-      text-align: center;
-    }
-
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-
-    th, td {
-      padding: 8px;
-      border-bottom: 1px solid #ddd;
-      text-align: left;
-    }
-
-    button {
-      padding: 10px 20px;
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-bottom: 20px;
-    }
-
-    button:hover {
-      background: #0056b3;
-    }
-  </style>
+  <title>Relatório de Estimativas - InsectFarmManager</title>
+  <link rel="stylesheet" href="layout.css">
 </head>
 <body>
 
-<h1>Relatório Completo de Estimativas</h1>
-<button onclick="window.print()">Imprimir Relatório</button>
+<!-- SIDEBAR COMPLETA -->
+<div class="sidebar">
+  <h2>InsectFarmManager</h2>
 
-<div class="card">
-  <h2>Resumo Geral</h2>
-  <p id="resumoGeral">Carregando...</p>
+  <div class="user-box">
+    <p id="usuarioNome">Usuário</p>
+    <button class="btn-sair" onclick="sair()">Sair</button>
+  </div>
+
+  <ul>
+    <li onclick="window.location.href='dashboard.html'">Dashboard</li>
+    <li onclick="window.location.href='lotes.html'">Lotes</li>
+    <li onclick="window.location.href='ciclos.html'">Ciclos</li>
+    <li onclick="window.location.href='monitoramento.html'">Monitoramento</li>
+    <li onclick="window.location.href='rendimento.html'">Rendimento</li>
+    <li onclick="window.location.href='estimativa.html'">Estimativa</li>
+    <li onclick="window.location.href='relatorio_estimativa.html'">Relatório</li>
+  </ul>
 </div>
 
-<div class="card">
-  <h2>Gráfico de Lucro ao Longo do Tempo</h2>
-  <canvas id="graficoRelatorio"></canvas>
-</div>
+<!-- CONTEÚDO PRINCIPAL -->
+<div class="content">
+  <h1>Relatório de Estimativas</h1>
 
-<div class="card">
-  <h2>Tabela Completa de Estimativas</h2>
+  <div class="card">
+    <h3>Filtros</h3>
+
+    <label>Lote</label>
+    <select id="selectLote">
+      <option value="">Todos</option>
+    </select>
+
+    <label>Bandeja</label>
+    <select id="selectBandeja">
+      <option value="">Todas</option>
+    </select>
+
+    <button id="btnFiltrar">Aplicar Filtros</button>
+  </div>
+
+  <h3>Resultados</h3>
+
   <table>
     <thead>
       <tr>
         <th>Lote</th>
         <th>Bandeja</th>
-        <th>Data</th>
-        <th>Peso Final (kg)</th>
-        <th>Custo Total (R$)</th>
-        <th>Lucro (R$)</th>
+        <th>Peso vivo</th>
+        <th>Crescimento</th>
+        <th>Relação vivo/seco</th>
+        <th>Estimativa seca</th>
+        <th>Registrado em</th>
       </tr>
     </thead>
-    <tbody id="tabelaEstimativas"></tbody>
+    <tbody id="listaRelatorio"></tbody>
   </table>
 </div>
 
+<!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import {
@@ -103,108 +85,111 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const tabela = document.getElementById("tabelaEstimativas");
-const resumoGeral = document.getElementById("resumoGeral");
+const selectLote = document.getElementById("selectLote");
+const selectBandeja = document.getElementById("selectBandeja");
+const lista = document.getElementById("listaRelatorio");
 
-let grafico = null;
+// CARREGAR LOTES
+async function carregarLotes() {
+  const snapshot = await getDocs(collection(db, "lotes"));
 
-async function carregarRelatorio() {
-  const estimativasSnap = await getDocs(collection(db, "estimativas"));
-  const lotesSnap = await getDocs(collection(db, "lotes"));
-
-  const lotesMap = {};
-  lotesSnap.forEach(l => lotesMap[l.id] = l.data());
-
-  let totalLucro = 0;
-  let totalCusto = 0;
-  let totalPeso = 0;
-
-  const dadosGrafico = [];
-
-  estimativasSnap.forEach(docItem => {
+  snapshot.forEach(docItem => {
     const item = docItem.data();
-
-    totalLucro += item.lucroEstimado;
-    totalCusto += item.custoTotal;
-    totalPeso += item.pesoFinal;
-
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${lotesMap[item.loteId]?.data || "Lote removido"}</td>
-      <td>${item.bandeja}</td>
-      <td>${item.data}</td>
-      <td>${item.pesoFinal}</td>
-      <td>R$ ${item.custoTotal.toFixed(2)}</td>
-      <td>R$ ${item.lucroEstimado.toFixed(2)}</td>
-    `;
-    tabela.appendChild(tr);
-
-    dadosGrafico.push({
-      data: item.data,
-      lucro: item.lucroEstimado
-    });
+    const opt = document.createElement("option");
+    opt.value = docItem.id;
+    opt.textContent = `${item.data} - ${item.bandejas} bandejas`;
+    selectLote.appendChild(opt);
   });
-
-  resumoGeral.innerHTML = `
-    <p><strong>Total de peso produzido:</strong> ${totalPeso} kg</p>
-    <p><strong>Total de custos:</strong> R$ ${totalCusto.toFixed(2)}</p>
-    <p><strong>Total de lucro estimado:</strong> R$ ${totalLucro.toFixed(2)}</p>
-  `;
-
-  gerarGrafico(dadosGrafico);
 }
 
-function gerarGrafico(dados) {
-  const ctx = document.getElementById("graficoRelatorio").getContext("2d");
+// CARREGAR BANDEJAS
+async function carregarBandejas() {
+  selectBandeja.innerHTML = `<option value="">Todas</option>`;
 
-  if (grafico) grafico.destroy();
+  const loteId = selectLote.value;
+  if (!loteId) return;
 
-  grafico = new Chart(ctx, {
-    type: "line",
-    data: {
-      labels: dados.map(d => d.data),
-      datasets: [{
-        label: "Lucro estimado (R$)",
-        data: dados.map(d => d.lucro),
-        borderColor: "rgba(255,99,132,1)",
-        backgroundColor: "rgba(255,99,132,0.2)",
-        tension: 0.2,
-        borderWidth: 2,
-        pointRadius: 4,
-        pointBackgroundColor: "#ff6384"
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        tooltip: {
-          callbacks: {
-            label: ctx => "Lucro: R$ " + ctx.raw.toFixed(2)
-          }
-        }
-      },
-      scales: {
-        x: {
-          title: {
-            display: true,
-            text: "Data",
-            font: { size: 16, weight: "bold" }
-          }
-        },
-        y: {
-          beginAtZero: true,
-          title: {
-            display: true,
-            text: "Lucro (R$)",
-            font: { size: 16, weight: "bold" }
-          }
-        }
+  const snapshot = await getDocs(collection(db, "lotes"));
+  snapshot.forEach(docItem => {
+    if (docItem.id === loteId) {
+      const dados = docItem.data();
+      for (let i = 1; i <= dados.bandejas; i++) {
+        const opt = document.createElement("option");
+        opt.value = i;
+        opt.textContent = "Bandeja " + i;
+        selectBandeja.appendChild(opt);
       }
     }
   });
 }
 
+selectLote.onchange = carregarBandejas;
+
+// CARREGAR RELATÓRIO
+async function carregarRelatorio() {
+  lista.innerHTML = "";
+
+  const loteFiltro = selectLote.value;
+  const bandejaFiltro = selectBandeja.value;
+
+  const snapshot = await getDocs(collection(db, "estimativas"));
+  const lotesSnapshot = await getDocs(collection(db, "lotes"));
+
+  const lotesMap = {};
+  lotesSnapshot.forEach(l => lotesMap[l.id] = l.data());
+
+  const registros = [];
+  snapshot.forEach(docItem => {
+    const item = { id: docItem.id, ...docItem.data() };
+
+    if (loteFiltro && item.loteId !== loteFiltro) return;
+    if (bandejaFiltro && item.bandeja != bandejaFiltro) return;
+
+    registros.push(item);
+  });
+
+  registros.sort((a, b) => (a.criadoEm || "").localeCompare(b.criadoEm || ""));
+
+  registros.forEach(item => {
+    const tr = document.createElement("tr");
+
+    const loteLabel = lotesMap[item.loteId]?.data || "Lote removido";
+
+    tr.innerHTML = `
+      <td>${loteLabel}</td>
+      <td>${item.bandeja}</td>
+      <td>${item.pesoVivo} g</td>
+      <td>${item.taxa}%</td>
+      <td>${item.relacao}%</td>
+      <td>${item.secoPrevisto.toFixed(2)} g</td>
+      <td>${item.criadoEm}</td>
+    `;
+
+    lista.appendChild(tr);
+  });
+}
+
+document.getElementById("btnFiltrar").onclick = carregarRelatorio;
+
+carregarLotes();
 carregarRelatorio();
+</script>
+
+<!-- AUTENTICAÇÃO / SAIR -->
+<script>
+function sair() {
+  localStorage.removeItem("usuarioLogado");
+  window.location.href = "index.html";
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const usuario = localStorage.getItem("usuarioLogado");
+  if (!usuario) {
+    window.location.href = "index.html";
+    return;
+  }
+  document.getElementById("usuarioNome").textContent = usuario;
+});
 </script>
 
 </body>

@@ -2,153 +2,237 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Monitoramento Ambiental</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Monitoramento - InsectFarmManager</title>
+  <link rel="stylesheet" href="layout.css">
 </head>
 <body>
 
-  <div class="container">
+<!-- SIDEBAR COMPLETA -->
+<div class="sidebar">
+  <h2>InsectFarmManager</h2>
 
-    <h2>Monitoramento Ambiental</h2>
-
-    <button onclick="window.location.href='dashboard.html'">⬅ Voltar</button>
-    <br><br>
-
-    <h3>Novo Registro</h3>
-
-    <select id="selectLote"></select>
-    <input id="temperatura" type="number" step="0.1" placeholder="Temperatura (°C)">
-    <input id="umidade" type="number" step="0.1" placeholder="Umidade (%)">
-    <input id="dataRegistro" type="date">
-
-    <button id="btnSalvar">Salvar Registro</button>
-
-    <hr>
-
-    <h3>Registros</h3>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Lote</th>
-          <th>Temperatura</th>
-          <th>Umidade</th>
-          <th>Data</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody id="listaMonitoramento"></tbody>
-    </table>
-
+  <div class="user-box">
+    <p id="usuarioNome">Usuário</p>
+    <button class="btn-sair" onclick="sair()">Sair</button>
   </div>
 
-  <!-- Firebase -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { 
-      getFirestore, collection, addDoc, getDocs, deleteDoc, doc 
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  <ul>
+    <li onclick="window.location.href='dashboard.html'">Dashboard</li>
+    <li onclick="window.location.href='lotes.html'">Lotes</li>
+    <li onclick="window.location.href='ciclos.html'">Ciclos</li>
+    <li onclick="window.location.href='monitoramento.html'">Monitoramento</li>
+    <li onclick="window.location.href='rendimento.html'">Rendimento</li>
+    <li onclick="window.location.href='estimativa.html'">Estimativa</li>
+    <li onclick="window.location.href='relatorio_estimativa.html'">Relatório</li>
+  </ul>
+</div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBd-iIfDpxpjmrISWZMw_0-sVE9Fj0_C5M",
-      authDomain: "insectfarmmanager.firebaseapp.com",
-      projectId: "insectfarmmanager",
-      storageBucket: "insectfarmmanager.firebasestorage.app",
-      messagingSenderId: "478537152748",
-      appId: "1:478537152748:web:b5e8217930bd9a5e550dc9",
-      measurementId: "G-47ZZLQSJVD"
-    };
+<!-- CONTEÚDO PRINCIPAL -->
+<div class="content">
+  <h1>Monitoramento</h1>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+  <div class="card">
+    <h3>Novo Registro de Monitoramento</h3>
 
-    const selectLote = document.getElementById("selectLote");
-    const lista = document.getElementById("listaMonitoramento");
+    <label>Lote</label>
+    <select id="selectLote"></select>
 
-    // CARREGAR LOTES NO SELECT
-    async function carregarLotes() {
-      selectLote.innerHTML = "";
+    <label>Bandeja</label>
+    <select id="selectBandeja"></select>
 
-      const snapshot = await getDocs(collection(db, "lotes"));
+    <label>Data do registro</label>
+    <input id="dataRegistro" type="date">
 
-      snapshot.forEach((docItem) => {
-        const item = docItem.data();
+    <label>Temperatura (°C)</label>
+    <input id="temperatura" type="number" step="0.1" placeholder="Ex: 27.5">
 
-        const option = document.createElement("option");
-        option.value = docItem.id;
-        option.textContent = `${item.data} - ${item.bandejas} bandejas`;
+    <label>Umidade relativa (%)</label>
+    <input id="umidade" type="number" step="0.1" placeholder="Ex: 65">
 
-        selectLote.appendChild(option);
-      });
-    }
+    <label>Observações</label>
+    <textarea id="obs" rows="3" placeholder="Anotações importantes..."></textarea>
 
-    // SALVAR REGISTRO
-    document.getElementById("btnSalvar").onclick = async function () {
-      const loteId = selectLote.value;
-      const temp = temperatura.value;
-      const umid = umidade.value;
-      const data = dataRegistro.value;
+    <button id="btnSalvar">Salvar Registro</button>
+  </div>
 
-      if (!loteId || !temp || !umid || !data) {
-        alert("Preencha todos os campos");
-        return;
+  <h3>Registros de Monitoramento</h3>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Lote</th>
+        <th>Bandeja</th>
+        <th>Data</th>
+        <th>Temperatura</th>
+        <th>Umidade</th>
+        <th>Obs</th>
+        <th>Criado em</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody id="listaMonitoramento"></tbody>
+  </table>
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { 
+  getFirestore, collection, addDoc, getDocs, deleteDoc, doc 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBd-iIfDpxpjmrISWZMw_0-sVE9Fj0_C5M",
+  authDomain: "insectfarmmanager.firebaseapp.com",
+  projectId: "insectfarmmanager",
+  storageBucket: "insectfarmmanager.firebasestorage.app",
+  messagingSenderId: "478537152748",
+  appId: "1:478537152748:web:b5e8217930bd9a5e550dc9",
+  measurementId: "G-47ZZLQSJVD"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const selectLote = document.getElementById("selectLote");
+const selectBandeja = document.getElementById("selectBandeja");
+const lista = document.getElementById("listaMonitoramento");
+
+// CARREGAR LOTES
+async function carregarLotes() {
+  selectLote.innerHTML = "";
+
+  const snapshot = await getDocs(collection(db, "lotes"));
+  snapshot.forEach(docItem => {
+    const item = docItem.data();
+    const option = document.createElement("option");
+    option.value = docItem.id;
+    option.textContent = `${item.data} - ${item.bandejas} bandejas`;
+    selectLote.appendChild(option);
+  });
+
+  if (selectLote.value) carregarBandejas();
+}
+
+// CARREGAR BANDEJAS DO LOTE
+async function carregarBandejas() {
+  const loteId = selectLote.value;
+  if (!loteId) return;
+
+  const snapshot = await getDocs(collection(db, "lotes"));
+  selectBandeja.innerHTML = "";
+
+  snapshot.forEach(docItem => {
+    if (docItem.id === loteId) {
+      const dados = docItem.data();
+      for (let i = 1; i <= dados.bandejas; i++) {
+        const opt = document.createElement("option");
+        opt.value = i;
+        opt.textContent = "Bandeja " + i;
+        selectBandeja.appendChild(opt);
       }
-
-      await addDoc(collection(db, "monitoramento"), {
-        loteId: loteId,
-        temperatura: Number(temp),
-        umidade: Number(umid),
-        data: data
-      });
-
-      alert("Registro salvo com sucesso!");
-      carregarMonitoramento();
-    };
-
-    // LISTAR REGISTROS
-    async function carregarMonitoramento() {
-      lista.innerHTML = "";
-
-      const snapshot = await getDocs(collection(db, "monitoramento"));
-      const lotesSnapshot = await getDocs(collection(db, "lotes"));
-
-      // Mapa para buscar nome do lote
-      const lotesMap = {};
-      lotesSnapshot.forEach((l) => {
-        lotesMap[l.id] = l.data();
-      });
-
-      snapshot.forEach((docItem) => {
-        const item = docItem.data();
-
-        const tr = document.createElement("tr");
-
-        tr.innerHTML = `
-          <td>${lotesMap[item.loteId]?.data || "Lote removido"}</td>
-          <td>${item.temperatura}°C</td>
-          <td>${item.umidade}%</td>
-          <td>${item.data}</td>
-          <td>
-            <button class="red" onclick="excluirRegistro('${docItem.id}')">Excluir</button>
-          </td>
-        `;
-
-        lista.appendChild(tr);
-      });
     }
+  });
+}
 
-    // EXCLUIR REGISTRO
-    window.excluirRegistro = async function (id) {
-      if (confirm("Deseja realmente excluir este registro?")) {
-        await deleteDoc(doc(db, "monitoramento", id));
-        carregarMonitoramento();
-      }
-    };
+selectLote.onchange = carregarBandejas;
 
-    // Carrega ao abrir a página
-    carregarLotes();
+// SALVAR MONITORAMENTO
+document.getElementById("btnSalvar").onclick = async function () {
+  const loteId = selectLote.value;
+  const bandeja = Number(selectBandeja.value);
+  const dataRegistro = document.getElementById("dataRegistro").value;
+  const temperatura = Number(document.getElementById("temperatura").value);
+  const umidade = Number(document.getElementById("umidade").value);
+  const obs = document.getElementById("obs").value.trim();
+
+  if (!loteId || !bandeja || !dataRegistro) {
+    alert("Preencha os campos obrigatórios.");
+    return;
+  }
+
+  const criadoEm = new Date().toLocaleString("pt-BR");
+
+  await addDoc(collection(db, "monitoramento"), {
+    loteId,
+    bandeja,
+    dataRegistro,
+    temperatura,
+    umidade,
+    obs,
+    criadoEm
+  });
+
+  alert("Registro salvo com sucesso!");
+  carregarMonitoramento();
+};
+
+// LISTAR MONITORAMENTO
+async function carregarMonitoramento() {
+  lista.innerHTML = "";
+
+  const snapshot = await getDocs(collection(db, "monitoramento"));
+  const lotesSnapshot = await getDocs(collection(db, "lotes"));
+
+  const lotesMap = {};
+  lotesSnapshot.forEach(l => lotesMap[l.id] = l.data());
+
+  const registros = [];
+  snapshot.forEach(docItem => {
+    registros.push({ id: docItem.id, ...docItem.data() });
+  });
+
+  registros.sort((a, b) => (a.dataRegistro || "").localeCompare(b.dataRegistro || ""));
+
+  registros.forEach(item => {
+    const tr = document.createElement("tr");
+
+    const loteLabel = lotesMap[item.loteId]?.data || "Lote removido";
+
+    tr.innerHTML = `
+      <td>${loteLabel}</td>
+      <td>${item.bandeja}</td>
+      <td>${item.dataRegistro}</td>
+      <td>${item.temperatura || "-"} °C</td>
+      <td>${item.umidade || "-"}%</td>
+      <td>${item.obs || "-"}</td>
+      <td>${item.criadoEm || "-"}</td>
+      <td>
+        <button class="btn-red" onclick="excluirRegistro('${item.id}')">Excluir</button>
+      </td>
+    `;
+
+    lista.appendChild(tr);
+  });
+}
+
+window.excluirRegistro = async function (id) {
+  if (confirm("Deseja realmente excluir este registro?")) {
+    await deleteDoc(doc(db, "monitoramento", id));
     carregarMonitoramento();
-  </script>
+  }
+};
+
+carregarLotes();
+carregarMonitoramento();
+</script>
+
+<!-- AUTENTICAÇÃO / SAIR -->
+<script>
+function sair() {
+  localStorage.removeItem("usuarioLogado");
+  window.location.href = "index.html";
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const usuario = localStorage.getItem("usuarioLogado");
+  if (!usuario) {
+    window.location.href = "index.html";
+    return;
+  }
+  document.getElementById("usuarioNome").textContent = usuario;
+});
+</script>
 
 </body>
 </html>
