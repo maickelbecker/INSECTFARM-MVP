@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Dashboard - InsectFarmManager</title>
-  <link rel="stylesheet" href="layout2.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -21,8 +21,6 @@
     <li onclick="window.location.href='ciclos.html'">Ciclos</li>
     <li onclick="window.location.href='monitoramento.html'">Monitoramento</li>
     <li onclick="window.location.href='rendimento.html'">Rendimento</li>
-    <li onclick="window.location.href='estimativa.html'">Estimativa</li>
-    <li onclick="window.location.href='relatorio_estimativa.html'">Relatório</li>
   </ul>
 </div>
 
@@ -30,59 +28,33 @@
   <h1>Bem-vindo ao InsectFarmManager!</h1>
 
   <div class="cards">
+
     <div class="card">
-      <h3>Total de Lotes</h3>
-      <p id="totalLotes">0</p>
+      <h3>Registrar Lotes</h3>
+      <p>Digitar Lotes</p>
+      <button onclick="window.location.href='lotes.html'">Acessar</button>
     </div>
 
     <div class="card">
-      <h3>Registros de Monitoramento</h3>
-      <p id="totalMonitoramento">0</p>
+      <h3>Ciclos Biológicos</h3>
+      <p>Ciclos Biológicos</p>
+      <button onclick="window.location.href='ciclos.html'">Acessar</button>
     </div>
 
     <div class="card">
-      <h3>Registros de Rendimento</h3>
-      <p id="totalRendimento">0</p>
+      <h3>Monitoramento Ambiental</h3>
+      <p>Monitoramento Ambiental</p>
+      <button onclick="window.location.href='monitoramento.html'">Acessar</button>
     </div>
 
     <div class="card">
-      <h3>Estimativas Geradas</h3>
-      <p id="totalEstimativas">0</p>
+      <h3>Rendimento da Produção</h3>
+      <p>Monitoramento do Rendimento</p>
+      <button onclick="window.location.href='rendimento.html'">Acessar</button>
     </div>
+
   </div>
 </div>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBd-iIfDpxpjmrISWZMw_0-sVE9Fj0_C5M",
-  authDomain: "insectfarmmanager.firebaseapp.com",
-  projectId: "insectfarmmanager",
-  storageBucket: "insectfarmmanager.firebasestorage.app",
-  messagingSenderId: "478537152748",
-  appId: "1:478537152748:web:b5e8217930bd9a5e550dc9",
-  measurementId: "G-47ZZLQSJVD"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-async function carregarDashboard() {
-  const lotes = await getDocs(collection(db, "lotes"));
-  const monitoramento = await getDocs(collection(db, "monitoramento"));
-  const rendimento = await getDocs(collection(db, "rendimento"));
-  const estimativas = await getDocs(collection(db, "estimativas"));
-
-  document.getElementById("totalLotes").textContent = lotes.size;
-  document.getElementById("totalMonitoramento").textContent = monitoramento.size;
-  document.getElementById("totalRendimento").textContent = rendimento.size;
-  document.getElementById("totalEstimativas").textContent = estimativas.size;
-}
-
-carregarDashboard();
-</script>
 
 <script>
 function sair() {
