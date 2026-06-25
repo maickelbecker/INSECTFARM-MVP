@@ -1,56 +1,53 @@
-@media (max-width: 900px) {
-  .container {
-    width: 95%;
-    margin: 0 auto;
-    padding: 10px;
-  }
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Rendimento da Produção</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-  table {
-    font-size: 14px;
-  }
+  <div class="container">
 
-  table th, table td {
-    padding: 6px;
-  }
+    <h2>Rendimento da Produção</h2>
 
-  button {
-    width: 100%;
-  }
-}
+    <button class="btn-voltar" onclick="window.location.href='dashboard.html'">⬅ Voltar</button>
 
-@media (max-width: 600px) {
+    <h3>Novo Registro de Rendimento</h3>
 
-  h2, h3 {
-    text-align: center;
-  }
+    <div class="form-grid">
+      <select id="selectLote"></select>
+      <input id="peso" type="number" step="0.01" placeholder="Peso final (kg)">
+      <input id="mortalidade" type="number" step="0.1" placeholder="Mortalidade (%)">
+      <input id="dataRegistro" type="date">
+      <button id="btnSalvar" class="btn-salvar">Salvar Rendimento</button>
+    </div>
 
-  select, input, button {
-    width: 100%;
-    margin-bottom: 10px;
-  }
+    <hr>
 
-  table {
-    display: block;
-    overflow-x: auto;
-    white-space: nowrap;
-  }
+    <h3>Histórico de Rendimento</h3>
 
-  table th, table td {
-    padding: 8px 12px;
-  }
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Lote</th>
+            <th>Peso Final</th>
+            <th>Mortalidade</th>
+            <th>Data</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="listaRendimento"></tbody>
+      </table>
+    </div>
 
-  .container {
-    padding: 5px;
-  }
-}
+  </div>
 
-@media (max-width: 400px) {
-  table {
-    font-size: 12px;
-  }
+  <!-- Firebase -->
+  <script type="module">
+    /* SEU JS PERMANECE IGUAL */
+  </script>
 
-  button {
-    font-size: 14px;
-    padding: 8px;
-  }
-}
+</body>
+</html>
