@@ -66,28 +66,38 @@
     // ============================
     // SALVAR LOTE (NÚMERO AUTOMÁTICO)
     // ============================
-    document.getElementById("btnSalvar").onclick = async function () {
-      const dataLote = data.value.trim();
-      const qtdBandejas = bandejas.value.trim();
+document.getElementById("btnSalvar").onclick = async function () {
+  const dataLote = data.value.trim();
+  const qtdBandejas = bandejas.value.trim();
 
-      if (!dataLote || !qtdBandejas) {
-        alert("Preencha todos os campos");
-        return;
-      }
+  if (!dataLote || !qtdBandejas) {
+    alert("Preencha todos os campos");
+    return;
+  }
 
-      // Conta quantos lotes existem no total
-      const snapshot = await getDocs(collection(db, "lotes"));
-      const numeroGerado = snapshot.size + 1;
+  // Busca todos os lotes
+  const snapshot = await getDocs(collection(db, "lotes"));
 
-      await addDoc(collection(db, "lotes"), {
-        numero: numeroGerado,
-        data: dataLote,
-        bandejas: Number(qtdBandejas),
-        dono: usuarioLogado
-      });
+  let maiorNumero = 0;
 
-      carregarLotes();
-    };
+  snapshot.forEach(docItem => {
+    const dados = docItem.data();
+    if (dados.numero > maiorNumero) {
+      maiorNumero = dados.numero;
+    }
+  });
+
+  const numeroGerado = maiorNumero + 1;
+
+  await addDoc(collection(db, "lotes"), {
+    numero: numeroGerado,
+    data: dataLote,
+    bandejas: Number(qtdBandejas),
+    dono: usuarioLogado
+  });
+
+  carregarLotes();
+};
 
     // ============================
     // LISTAR LOTES DO USUÁRIO
