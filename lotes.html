@@ -2,42 +2,34 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Gerenciar Lotes</title>
+  <title>Lotes</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
   <div class="container">
 
-    <h2>Gerenciar Lotes</h2>
+    <h2>Cadastrar Lote</h2>
 
-    <button onclick="window.location.href='dashboard.html'">⬅ Voltar</button>
-    <br><br>
+    <input id="numero" type="text" placeholder="Número do lote">
+    <input id="data" type="date">
+    <input id="bandejas" type="number" placeholder="Quantidade de bandejas">
 
-    <h3>Novo Lote</h3>
+    <button id="btnSalvar">Salvar</button>
 
-    <input id="dataLote" type="date" placeholder="Data do lote">
-    <input id="qtdBandejas" type="number" min="1" placeholder="Quantidade de bandejas">
+    <h3>Meus Lotes</h3>
 
-    <button id="btnSalvar">Salvar Lote</button>
-
-    <hr>
-
-    <h3>Lotes Cadastrados</h3>
-
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Lote</th>
-            <th>Data</th>
-            <th>Bandejas</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody id="listaLotes"></tbody>
-      </table>
-    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Número</th>
+          <th>Data</th>
+          <th>Bandejas</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="listaLotes"></tbody>
+    </table>
 
   </div>
 
@@ -45,7 +37,8 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { 
-      getFirestore, collection, addDoc, getDocs, deleteDoc, doc 
+      getFirestore, collection, addDoc, deleteDoc, doc,
+      query, where, getDocs 
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -61,47 +54,58 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const lista = document.getElementById("listaLotes");
+    const usuarioLogado = localStorage.getItem("usuarioLogado");
 
+    if (!usuarioLogado) {
+      alert("Você precisa estar logado");
+      window.location.href = "index.html";
+    }
+
+    // ============================
     // SALVAR LOTE
+    // ============================
     document.getElementById("btnSalvar").onclick = async function () {
-      const data = dataLote.value;
-      const bandejas = qtdBandejas.value;
+      const numero = numero.value.trim();
+      const dataLote = data.value.trim();
+      const qtdBandejas = bandejas.value.trim();
 
-      if (!data || !bandejas) {
+      if (!numero || !dataLote || !qtdBandejas) {
         alert("Preencha todos os campos");
         return;
       }
 
-      // Gerar número sequencial baseado na ordem de cadastro
-      const snapshot = await getDocs(collection(db, "lotes"));
-      const numeroLote = snapshot.size + 1;
-
       await addDoc(collection(db, "lotes"), {
-        numero: numeroLote,
-        data: data,
-        bandejas: Number(bandejas)
+        numero: numero,
+        data: dataLote,
+        bandejas: Number(qtdBandejas),
+        dono: usuarioLogado
       });
 
-      alert("Lote salvo com sucesso!");
       carregarLotes();
     };
 
-    // LISTAR LOTES
+    // ============================
+    // LISTAR LOTES DO USUÁRIO
+    // ============================
     async function carregarLotes() {
+      const lista = document.getElementById("listaLotes");
       lista.innerHTML = "";
 
-      const snapshot = await getDocs(collection(db, "lotes"));
+      const q = query(
+        collection(db, "lotes"),
+        where("dono", "==", usuarioLogado)
+      );
 
-      snapshot.forEach((docItem) => {
-        const item = docItem.data();
+      const snapshot = await getDocs(q);
+
+      snapshot.forEach(docItem => {
+        const dados = docItem.data();
 
         const tr = document.createElement("tr");
-
         tr.innerHTML = `
-          <td>${item.numero}</td>
-          <td>${item.data}</td>
-          <td>${item.bandejas}</td>
+          <td>${dados.numero}</td>
+          <td>${dados.data}</td>
+          <td>${dados.bandejas}</td>
           <td>
             <button class="red" onclick="excluirLote('${docItem.id}')">Excluir</button>
           </td>
@@ -111,12 +115,12 @@
       });
     }
 
+    // ============================
     // EXCLUIR LOTE
+    // ============================
     window.excluirLote = async function (id) {
-      if (confirm("Deseja realmente excluir este lote?")) {
-        await deleteDoc(doc(db, "lotes", id));
-        carregarLotes();
-      }
+      await deleteDoc(doc(db, "lotes", id));
+      carregarLotes();
     };
 
     carregarLotes();
