@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Qualidade da Produção</title>
+  <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* Sidebar fixa */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 220px;
+      height: 100vh;
+      background: #343a40;
+      padding: 20px;
+      color: white;
+    }
+
+    .sidebar h2 {
+      margin-bottom: 20px;
+      font-size: 20px;
+      text-align: center;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .sidebar li {
+      padding: 12px;
+      margin-bottom: 8px;
+      background: #495057;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.2s;
+      text-align: center;
+    }
+
+    .sidebar li:hover {
+      background: #6c757d;
+    }
+
+    /* Área principal */
+    .content {
+      margin-left: 260px;
+      padding: 20px;
+      width: calc(100% - 260px);
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    input, select {
+      padding: 10px;
+      margin-right: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    button.red {
+      background: #dc3545;
+    }
+
+    button.red:hover {
+      background: #b02a37;
+    }
+
+    /* Tabela estilo Excel */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    table th, table td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+      font-size: 15px;
+    }
+
+    table th {
+      background: #f1f1f1;
+      font-weight: bold;
+    }
+
+    table tr:hover {
+      background: #f9f9f9;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <h2>InsectFarmManager</h2>
+    <ul>
+      <li onclick="window.location.href='dashboard.html'">Dashboard</li>
+      <li onclick="window.location.href='lotes.html'">Lotes</li>
+      <li onclick="window.location.href='ciclos.html'">Ciclos</li>
+      <li onclick="window.location.href='monitoramento.html'">Monitoramento</li>
+      <li onclick="window.location.href='rendimento.html'">Rendimento</li>
+      <li onclick="window.location.href='qualidade.html'">Qualidade da Produção</li>
+      <li onclick="sair()">Sair</li>
+    </ul>
+  </div>
+
+  <!-- CONTEÚDO -->
+  <div class="content">
+
+    <h2>Qualidade da Produção</h2>
+
+    <select id="loteSelect"></select>
+    <select id="bandejaSelect"></select>
+    <input id="data" type="date">
+
+    <input id="sobrevivencia" type="number" placeholder="Taxa de sobrevivência (%)">
+    <input id="proteina" type="number" placeholder="Proteína bruta (%)">
+    <input id="lipidios" type="number" placeholder="Lipídios (%)">
+    <input id="carboidratos" type="number" placeholder="Carboidratos (%)">
+    <input id="umidade" type="number" placeholder="Umidade (%)">
+
+    <button id="btnSalvar">Salvar</button>
+
+    <h3>Registros de Qualidade da Produção</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Lote</th>
+          <th>Bandeja</th>
+          <th>Data</th>
+          <th>Sobrevivência</th>
+          <th>Proteína</th>
+          <th>Lipídios</th>
+          <th>Carboidratos</th>
+          <th>Umidade</th>
+          <th>Registrado em</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="listaQualidade"></tbody>
+    </table>
+
+  </div>
+
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+      getFirestore, collection, addDoc, deleteDoc, doc,
+      query, where, getDocs 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBd-iIfDpxpjmrISWZMw_0-sVE9Fj0_C5M",
+      authDomain: "insectfarmmanager.firebaseapp.com",
+      projectId: "insectfarmmanager",
+      storageBucket: "insectfarmmanager.firebasestorage.app",
+      messagingSenderId: "478537152748",
+      appId: "1:478537152748:web:b5e8217930bd9a5e550dc9",
+      measurementId: "G-47ZZLQSJVD"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const usuarioLogado = localStorage.getItem("usuarioLogado");
+
+    if (!usuarioLogado) {
+      alert("Você precisa estar logado");
+      window.location.href = "login.html";
+    }
+
+    // ============================
+    // CARREGAR LOTES
+    // ============================
+    async function carregarLotes() {
+      const select = document.getElementById("loteSelect");
+      select.innerHTML = "";
+
+      const q = query(
+        collection(db, "lotes"),
+        where("dono", "==", usuarioLogado)
+      );
+
+      const snapshot = await getDocs(q);
+
+      snapshot.forEach(docItem => {
+        const dados = docItem.data();
+        const opt = document.createElement("option");
+        opt.value = dados.numero;
+        opt.textContent = "Lote " + dados.numero;
+        select.appendChild(opt);
+      });
+
+      carregarBandejas();
+    }
+
+    // ============================
+    // CARREGAR BANDEJAS
+    // ============================
+    async function carregarBandejas() {
+      const lote = document.getElementById("loteSelect").value;
+      const select = document.getElementById("bandejaSelect");
+
+      select.innerHTML = "";
+
+      const q = query(
+        collection(db, "lotes"),
+        where("dono", "==", usuarioLogado),
+        where("numero", "==", Number(lote))
+      );
+
+      const snapshot = await getDocs(q);
+
+      snapshot.forEach(docItem => {
+        const dados = docItem.data();
+
+        for (let i = 1; i <= dados.bandejas; i++) {
+          const opt = document.createElement("option");
+          opt.value = i;
+          opt.textContent = "Bandeja " + i;
+          select.appendChild(opt);
+        }
+      });
+    }
+
+    document.getElementById("loteSelect").addEventListener("change", carregarBandejas);
+
+    // ============================
+    // SALVAR QUALIDADE
+    // ============================
+    document.getElementById("btnSalvar").onclick = async function () {
+      const lote = loteSelect.value;
+      const bandeja = bandejaSelect.value;
+      const dataReg = data.value.trim();
+
+      const s = sobrevivencia.value.trim();
+      const p = proteina.value.trim();
+      const l = lipidios.value.trim();
+      const c = carboidratos.value.trim();
+      const u = umidade.value.trim();
+
+      if (!lote || !bandeja || !dataReg || !s || !p || !l || !c || !u) {
+        alert("Preencha todos os campos");
+        return;
+      }
+
+      const agora = new Date().toLocaleString();
+
+      await addDoc(collection(db, "qualidade"), {
+        lote: Number(lote),
+        bandeja: Number(bandeja),
+        data: dataReg,
+        sobrevivencia: Number(s),
+        proteinaBruta: Number(p),
+        lipidios: Number(l),
+        carboidratos: Number(c),
+        umidade: Number(u),
+        registradoEm: agora,
+        dono: usuarioLogado
+      });
+
+      carregarQualidade();
+    };
+
+    // ============================
+    // LISTAR QUALIDADE
+    // ============================
+    async function carregarQualidade() {
+      const lista = document.getElementById("listaQualidade");
+      lista.innerHTML = "";
+
+      const q = query(
+        collection(db, "qualidade"),
+        where("dono", "==", usuarioLogado)
+      );
+
+      const snapshot = await getDocs(q);
+
+      snapshot.forEach(docItem => {
+        const dados = docItem.data();
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${dados.lote}</td>
+          <td>${dados.bandeja}</td>
+          <td>${dados.data}</td>
+          <td>${dados.sobrevivencia}%</td>
+          <td>${dados.proteinaBruta}%</td>
+          <td>${dados.lipidios}%</td>
+          <td>${dados.carboidratos}%</td>
+          <td>${dados.umidade}%</td>
+          <td>${dados.registradoEm}</td>
+          <td>
+            <button class="red" onclick="excluirQualidade('${docItem.id}')">Excluir</button>
+          </td>
+        `;
+
+        lista.appendChild(tr);
+      });
+    }
+
+    // ============================
+    // EXCLUIR REGISTRO
+    // ============================
+    window.excluirQualidade = async function (id) {
+      await deleteDoc(doc(db, "qualidade", id));
+      carregarQualidade();
+    };
+
+    carregarLotes();
+    carregarQualidade();
+
+    window.sair = function () {
+      localStorage.removeItem("usuarioLogado");
+      window.location.href = "login.html";
+    };
+  </script>
+
+</body>
+</html>
