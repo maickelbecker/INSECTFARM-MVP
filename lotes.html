@@ -51,11 +51,76 @@
       height: 100vh;
       overflow-y: auto;
     }
+
+    /* Inputs */
+    input {
+      padding: 10px;
+      margin-right: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    /* Tabela estilo Excel */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    table th, table td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+      font-size: 15px;
+    }
+
+    table th {
+      background: #f1f1f1;
+      font-weight: bold;
+    }
+
+    table tr:hover {
+      background: #f9f9f9;
+    }
+
+    table tr:last-child td {
+      border-bottom: none;
+    }
+
+    button.red {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button.red:hover {
+      background: #b02a37;
+    }
   </style>
 </head>
 <body>
 
-  <!-- SIDEBAR PADRONIZADA -->
+  <!-- SIDEBAR -->
   <div class="sidebar">
     <h2>InsectFarmManager</h2>
     <ul>
@@ -68,7 +133,7 @@
     </ul>
   </div>
 
-  <!-- CONTEÚDO PRINCIPAL -->
+  <!-- CONTEÚDO -->
   <div class="content">
 
     <h2>Cadastrar Lote</h2>
