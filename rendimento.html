@@ -4,49 +4,344 @@
   <meta charset="UTF-8">
   <title>Rendimento da Produção</title>
   <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* Sidebar fixa */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 220px;
+      height: 100vh;
+      background: #343a40;
+      padding: 20px;
+      color: white;
+    }
+
+    .sidebar h2 {
+      margin-bottom: 20px;
+      font-size: 20px;
+      text-align: center;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .sidebar li {
+      padding: 12px;
+      margin-bottom: 8px;
+      background: #495057;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.2s;
+      text-align: center;
+    }
+
+    .sidebar li:hover {
+      background: #6c757d;
+    }
+
+    /* Área principal */
+    .content {
+      margin-left: 260px;
+      padding: 20px;
+      width: calc(100% - 260px);
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    input, select {
+      padding: 10px;
+      margin-right: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    button.red {
+      background: #dc3545;
+    }
+
+    button.red:hover {
+      background: #b02a37;
+    }
+
+    /* Tabela estilo Excel */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    table th, table td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+      font-size: 15px;
+    }
+
+    table th {
+      background: #f1f1f1;
+      font-weight: bold;
+    }
+
+    table tr:hover {
+      background: #f9f9f9;
+    }
+  </style>
 </head>
 <body>
 
-  <div class="container">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <h2>InsectFarmManager</h2>
+    <ul>
+      <li onclick="window.location.href='dashboard.html'">Dashboard</li>
+      <li onclick="window.location.href='lotes.html'">Lotes</li>
+      <li onclick="window.location.href='ciclos.html'">Ciclos</li>
+      <li onclick="window.location.href='monitoramento.html'">Monitoramento</li>
+      <li onclick="window.location.href='rendimento.html'">Rendimento</li>
+      <li onclick="sair()">Sair</li>
+    </ul>
+  </div>
 
-    <h2>Rendimento da Produção</h2>
+  <!-- CONTEÚDO -->
+  <div class="content">
 
-    <button class="btn-voltar" onclick="window.location.href='dashboard.html'">⬅ Voltar</button>
+    <h2>Monitoramento do Rendimento da Produção</h2>
 
-    <h3>Novo Registro de Rendimento</h3>
+    <select id="loteSelect"></select>
+    <select id="bandejaSelect"></select>
+    <input id="data" type="date">
 
-    <div class="form-grid">
-      <select id="selectLote"></select>
-      <input id="peso" type="number" step="0.01" placeholder="Peso final (kg)">
-      <input id="mortalidade" type="number" step="0.1" placeholder="Mortalidade (%)">
-      <input id="dataRegistro" type="date">
-      <button id="btnSalvar" class="btn-salvar">Salvar Rendimento</button>
-    </div>
+    <input id="pesoVivo" type="number" placeholder="Peso Vivo Total (g)">
+    <input id="pesoSeco" type="number" placeholder="Peso Seco (g)">
+    <input id="crescimento" type="number" placeholder="Taxa de Crescimento (%)">
+    <input id="racao" type="number" placeholder="Quantidade de Ração (g)">
 
-    <hr>
+    <select id="momento">
+      <option value="Início do Ciclo Larval">Início do Ciclo Larval</option>
+      <option value="Meio do Ciclo Larval">Meio do Ciclo Larval</option>
+      <option value="Final do Ciclo Larval">Final do Ciclo Larval</option>
+      <option value="Pré-Pupa">Pré-Pupa</option>
+      <option value="Pupa">Pupa</option>
+      <option value="Adulto">Adulto</option>
+    </select>
 
-    <h3>Histórico de Rendimento</h3>
+    <button id="btnSalvar">Salvar</button>
 
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Lote</th>
-            <th>Peso Final</th>
-            <th>Mortalidade</th>
-            <th>Data</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody id="listaRendimento"></tbody>
-      </table>
-    </div>
+    <h3>Registros de Rendimento</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Lote</th>
+          <th>Bandeja</th>
+          <th>Data</th>
+          <th>Peso Vivo</th>
+          <th>Peso Seco</th>
+          <th>Crescimento</th>
+          <th>Ração</th>
+          <th>Momento</th>
+          <th>Registrado em</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="listaRendimento"></tbody>
+    </table>
 
   </div>
 
   <!-- Firebase -->
   <script type="module">
-    /* SEU JS PERMANECE IGUAL */
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+      getFirestore, collection, addDoc, deleteDoc, doc,
+      query, where, getDocs 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBd-iIfDpxpjmrISWZMw_0-sVE9Fj0_C5M",
+      authDomain: "insectfarmmanager.firebaseapp.com",
+      projectId: "insectfarmmanager",
+      storageBucket: "insectfarmmanager.firebasestorage.app",
+      messagingSenderId: "478537152748",
+      appId: "1:478537152748:web:b5e8217930bd9a5e550dc9",
+      measurementId: "G-47ZZLQSJVD"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const usuarioLogado = localStorage.getItem("usuarioLogado");
+
+    if (!usuarioLogado) {
+      alert("Você precisa estar logado");
+      window.location.href = "login.html";
+    }
+
+    // ============================
+    // CARREGAR LOTES
+    // ============================
+    async function carregarLotes() {
+      const select = document.getElementById("loteSelect");
+      select.innerHTML = "";
+
+      const q = query(
+        collection(db, "lotes"),
+        where("dono", "==", usuarioLogado)
+      );
+
+      const snapshot = await getDocs(q);
+
+      snapshot.forEach(docItem => {
+        const dados = docItem.data();
+        const opt = document.createElement("option");
+        opt.value = dados.numero;
+        opt.textContent = "Lote " + dados.numero;
+        select.appendChild(opt);
+      });
+
+      carregarBandejas();
+    }
+
+    // ============================
+    // CARREGAR BANDEJAS
+    // ============================
+    async function carregarBandejas() {
+      const lote = document.getElementById("loteSelect").value;
+      const select = document.getElementById("bandejaSelect");
+
+      select.innerHTML = "";
+
+      const q = query(
+        collection(db, "lotes"),
+        where("dono", "==", usuarioLogado),
+        where("numero", "==", Number(lote))
+      );
+
+      const snapshot = await getDocs(q);
+
+      snapshot.forEach(docItem => {
+        const dados = docItem.data();
+
+        for (let i = 1; i <= dados.bandejas; i++) {
+          const opt = document.createElement("option");
+          opt.value = i;
+          opt.textContent = "Bandeja " + i;
+          select.appendChild(opt);
+        }
+      });
+    }
+
+    document.getElementById("loteSelect").addEventListener("change", carregarBandejas);
+
+    // ============================
+    // SALVAR RENDIMENTO
+    // ============================
+    document.getElementById("btnSalvar").onclick = async function () {
+      const lote = loteSelect.value;
+      const bandeja = bandejaSelect.value;
+      const dataReg = data.value.trim();
+      const vivo = pesoVivo.value.trim();
+      const seco = pesoSeco.value.trim();
+      const cresc = crescimento.value.trim();
+      const rac = racao.value.trim();
+      const momentoReg = momento.value;
+
+      if (!lote || !bandeja || !dataReg || !vivo || !seco || !cresc || !rac) {
+        alert("Preencha todos os campos");
+        return;
+      }
+
+      const agora = new Date().toLocaleString();
+
+      await addDoc(collection(db, "rendimento"), {
+        lote: Number(lote),
+        bandeja: Number(bandeja),
+        data: dataReg,
+        pesoVivo: Number(vivo),
+        pesoSeco: Number(seco),
+        crescimento: Number(cresc),
+        racao: Number(rac),
+        momento: momentoReg,
+        registradoEm: agora,
+        dono: usuarioLogado
+      });
+
+      carregarRendimento();
+    };
+
+    // ============================
+    // LISTAR RENDIMENTO
+    // ============================
+    async function carregarRendimento() {
+      const lista = document.getElementById("listaRendimento");
+      lista.innerHTML = "";
+
+      const q = query(
+        collection(db, "rendimento"),
+        where("dono", "==", usuarioLogado)
+      );
+
+      const snapshot = await getDocs(q);
+
+      snapshot.forEach(docItem => {
+        const dados = docItem.data();
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${dados.lote}</td>
+          <td>${dados.bandeja}</td>
+          <td>${dados.data}</td>
+          <td>${dados.pesoVivo}g</td>
+          <td>${dados.pesoSeco}g</td>
+          <td>${dados.crescimento}%</td>
+          <td>${dados.racao}g</td>
+          <td>${dados.momento}</td>
+          <td>${dados.registradoEm}</td>
+          <td>
+            <button class="red" onclick="excluirRendimento('${docItem.id}')">Excluir</button>
+          </td>
+        `;
+
+        lista.appendChild(tr);
+      });
+    }
+
+    // ============================
+    // EXCLUIR RENDIMENTO
+    // ============================
+    window.excluirRendimento = async function (id) {
+      await deleteDoc(doc(db, "rendimento", id));
+      carregarRendimento();
+    };
+
+    carregarLotes();
+    carregarRendimento();
+
+    window.sair = function () {
+      localStorage.removeItem("usuarioLogado");
+      window.location.href = "login.html";
+    };
   </script>
 
 </body>
