@@ -70,7 +70,12 @@
         return;
       }
 
+      // Buscar quantidade atual de lotes para gerar número sequencial
+      const snapshot = await getDocs(collection(db, "lotes"));
+      const numeroLote = snapshot.size + 1;
+
       await addDoc(collection(db, "lotes"), {
+        numero: numeroLote,
         data: data,
         bandejas: Number(bandejas)
       });
@@ -91,7 +96,7 @@
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
-          <td>${item.data}</td>
+          <td>Lote ${item.numero} - ${item.data}</td>
           <td>${item.bandejas}</td>
           <td>
             <button class="red" onclick="excluirLote('${docItem.id}')">Excluir</button>
