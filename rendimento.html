@@ -1,154 +1,56 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Rendimento da Produção</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+@media (max-width: 900px) {
+  .container {
+    width: 95%;
+    margin: 0 auto;
+    padding: 10px;
+  }
 
-  <div class="container">
+  table {
+    font-size: 14px;
+  }
 
-    <h2>Rendimento da Produção</h2>
+  table th, table td {
+    padding: 6px;
+  }
 
-    <button onclick="window.location.href='dashboard.html'">⬅ Voltar</button>
-    <br><br>
+  button {
+    width: 100%;
+  }
+}
 
-    <h3>Novo Registro de Rendimento</h3>
+@media (max-width: 600px) {
 
-    <select id="selectLote"></select>
-    <input id="peso" type="number" step="0.01" placeholder="Peso final (kg)">
-    <input id="mortalidade" type="number" step="0.1" placeholder="Mortalidade (%)">
-    <input id="dataRegistro" type="date">
+  h2, h3 {
+    text-align: center;
+  }
 
-    <button id="btnSalvar">Salvar Rendimento</button>
+  select, input, button {
+    width: 100%;
+    margin-bottom: 10px;
+  }
 
-    <hr>
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
 
-    <h3>Histórico de Rendimento</h3>
+  table th, table td {
+    padding: 8px 12px;
+  }
 
-    <table>
-      <thead>
-        <tr>
-          <th>Lote</th>
-          <th>Peso Final</th>
-          <th>Mortalidade</th>
-          <th>Data</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody id="listaRendimento"></tbody>
-    </table>
+  .container {
+    padding: 5px;
+  }
+}
 
-  </div>
+@media (max-width: 400px) {
+  table {
+    font-size: 12px;
+  }
 
-  <!-- Firebase -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { 
-      getFirestore, collection, addDoc, getDocs, deleteDoc, doc 
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBd-iIfDpxpjmrISWZMw_0-sVE9Fj0_C5M",
-      authDomain: "insectfarmmanager.firebaseapp.com",
-      projectId: "insectfarmmanager",
-      storageBucket: "insectfarmmanager.firebasestorage.app",
-      messagingSenderId: "478537152748",
-      appId: "1:478537152748:web:b5e8217930bd9a5e550dc9",
-      measurementId: "G-47ZZLQSJVD"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    const selectLote = document.getElementById("selectLote");
-    const lista = document.getElementById("listaRendimento");
-
-    // CARREGAR LOTES NO SELECT
-    async function carregarLotes() {
-      selectLote.innerHTML = "";
-
-      const snapshot = await getDocs(collection(db, "lotes"));
-
-      snapshot.forEach((docItem) => {
-        const item = docItem.data();
-
-        const option = document.createElement("option");
-        option.value = docItem.id;
-        option.textContent = `${item.data} - ${item.bandejas} bandejas`;
-
-        selectLote.appendChild(option);
-      });
-    }
-
-    // SALVAR RENDIMENTO
-    document.getElementById("btnSalvar").onclick = async function () {
-      const loteId = selectLote.value;
-      const pesoFinal = peso.value;
-      const mort = mortalidade.value;
-      const data = dataRegistro.value;
-
-      if (!loteId || !pesoFinal || !mort || !data) {
-        alert("Preencha todos os campos");
-        return;
-      }
-
-      await addDoc(collection(db, "rendimento"), {
-        loteId: loteId,
-        pesoFinal: Number(pesoFinal),
-        mortalidade: Number(mort),
-        data: data
-      });
-
-      alert("Rendimento registrado com sucesso!");
-      carregarRendimento();
-    };
-
-    // LISTAR RENDIMENTO
-    async function carregarRendimento() {
-      lista.innerHTML = "";
-
-      const snapshot = await getDocs(collection(db, "rendimento"));
-      const lotesSnapshot = await getDocs(collection(db, "lotes"));
-
-      // Mapa para buscar nome do lote
-      const lotesMap = {};
-      lotesSnapshot.forEach((l) => {
-        lotesMap[l.id] = l.data();
-      });
-
-      snapshot.forEach((docItem) => {
-        const item = docItem.data();
-
-        const tr = document.createElement("tr");
-
-        tr.innerHTML = `
-          <td>${lotesMap[item.loteId]?.data || "Lote removido"}</td>
-          <td>${item.pesoFinal} kg</td>
-          <td>${item.mortalidade}%</td>
-          <td>${item.data}</td>
-          <td>
-            <button class="red" onclick="excluirRendimento('${docItem.id}')">Excluir</button>
-          </td>
-        `;
-
-        lista.appendChild(tr);
-      });
-    }
-
-    // EXCLUIR RENDIMENTO
-    window.excluirRendimento = async function (id) {
-      if (confirm("Deseja realmente excluir este registro?")) {
-        await deleteDoc(doc(db, "rendimento", id));
-        carregarRendimento();
-      }
-    };
-
-    // Carrega ao abrir a página
-    carregarLotes();
-    carregarRendimento();
-  </script>
-
-</body>
-</html>
+  button {
+    font-size: 14px;
+    padding: 8px;
+  }
+}
