@@ -4,14 +4,75 @@
   <meta charset="UTF-8">
   <title>Lotes</title>
   <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* Sidebar fixa (igual ao dashboard) */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 220px;
+      height: 100vh;
+      background: #343a40;
+      padding: 20px;
+      color: white;
+    }
+
+    .sidebar h2 {
+      margin-bottom: 20px;
+      font-size: 20px;
+      text-align: center;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .sidebar li {
+      padding: 12px;
+      margin-bottom: 8px;
+      background: #495057;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.2s;
+      text-align: center;
+    }
+
+    .sidebar li:hover {
+      background: #6c757d;
+    }
+
+    /* Área principal com rolagem */
+    .content {
+      margin-left: 260px;
+      padding: 20px;
+      width: calc(100% - 260px);
+      height: 100vh;
+      overflow-y: auto;
+    }
+  </style>
 </head>
 <body>
 
-  <div class="container">
+  <!-- SIDEBAR PADRONIZADA -->
+  <div class="sidebar">
+    <h2>InsectFarmManager</h2>
+    <ul>
+      <li onclick="window.location.href='dashboard.html'">Dashboard</li>
+      <li onclick="window.location.href='lotes.html'">Lotes</li>
+      <li onclick="window.location.href='ciclos.html'">Ciclos</li>
+      <li onclick="window.location.href='monitoramento.html'">Monitoramento</li>
+      <li onclick="window.location.href='rendimento.html'">Rendimento</li>
+      <li onclick="sair()">Sair</li>
+    </ul>
+  </div>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <div class="content">
 
     <h2>Cadastrar Lote</h2>
 
-    <!-- Campo de número removido -->
     <input id="data" type="date">
     <input id="bandejas" type="number" placeholder="Quantidade de bandejas">
 
@@ -58,12 +119,10 @@
 
     if (!usuarioLogado) {
       alert("Você precisa estar logado");
-      window.location.href = "index.html";
+      window.location.href = "login.html";
     }
 
-    // ============================
-    // SALVAR LOTE (NÚMERO SEQUENCIAL REAL)
-    // ============================
+    // SALVAR LOTE COM NÚMERO SEQUENCIAL REAL
     document.getElementById("btnSalvar").onclick = async function () {
       const dataLote = data.value.trim();
       const qtdBandejas = bandejas.value.trim();
@@ -73,7 +132,6 @@
         return;
       }
 
-      // Busca todos os lotes do usuário
       const q = query(
         collection(db, "lotes"),
         where("dono", "==", usuarioLogado)
@@ -102,9 +160,7 @@
       carregarLotes();
     };
 
-    // ============================
-    // LISTAR LOTES DO USUÁRIO
-    // ============================
+    // LISTAR LOTES
     async function carregarLotes() {
       const lista = document.getElementById("listaLotes");
       lista.innerHTML = "";
@@ -133,15 +189,18 @@
       });
     }
 
-    // ============================
     // EXCLUIR LOTE
-    // ============================
     window.excluirLote = async function (id) {
       await deleteDoc(doc(db, "lotes", id));
       carregarLotes();
     };
 
     carregarLotes();
+
+    window.sair = function () {
+      localStorage.removeItem("usuarioLogado");
+      window.location.href = "login.html";
+    };
   </script>
 
 </body>
