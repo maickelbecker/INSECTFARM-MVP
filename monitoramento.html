@@ -4,26 +4,138 @@
   <meta charset="UTF-8">
   <title>Monitoramento Ambiental</title>
   <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* Sidebar fixa */
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 220px;
+      height: 100vh;
+      background: #343a40;
+      padding: 20px;
+      color: white;
+    }
+
+    .sidebar h2 {
+      margin-bottom: 20px;
+      font-size: 20px;
+      text-align: center;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .sidebar li {
+      padding: 12px;
+      margin-bottom: 8px;
+      background: #495057;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: 0.2s;
+      text-align: center;
+    }
+
+    .sidebar li:hover {
+      background: #6c757d;
+    }
+
+    /* Área principal */
+    .content {
+      margin-left: 260px;
+      padding: 20px;
+      width: calc(100% - 260px);
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    input, select {
+      padding: 10px;
+      margin-right: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    button.red {
+      background: #dc3545;
+    }
+
+    button.red:hover {
+      background: #b02a37;
+    }
+
+    /* Tabela estilo Excel */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    table th, table td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+      font-size: 15px;
+    }
+
+    table th {
+      background: #f1f1f1;
+      font-weight: bold;
+    }
+
+    table tr:hover {
+      background: #f9f9f9;
+    }
+  </style>
 </head>
 <body>
 
-  <div class="container">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <h2>InsectFarmManager</h2>
+    <ul>
+      <li onclick="window.location.href='dashboard.html'">Dashboard</li>
+      <li onclick="window.location.href='lotes.html'">Lotes</li>
+      <li onclick="window.location.href='ciclos.html'">Ciclos</li>
+      <li onclick="window.location.href='monitoramento.html'">Monitoramento</li>
+      <li onclick="window.location.href='rendimento.html'">Rendimento</li>
+      <li onclick="sair()">Sair</li>
+    </ul>
+  </div>
+
+  <!-- CONTEÚDO -->
+  <div class="content">
 
     <h2>Monitoramento Ambiental</h2>
 
-    <button onclick="window.location.href='dashboard.html'">⬅ Voltar</button>
-    <br><br>
+    <select id="loteSelect"></select>
+    <select id="bandejaSelect"></select>
+    <input id="data" type="date">
 
-    <h3>Novo Registro</h3>
+    <input id="temperatura" type="number" placeholder="Temperatura (°C)">
+    <input id="umidade" type="number" placeholder="Umidade (%)">
 
-    <select id="selectLote"></select>
-    <input id="temperatura" type="number" step="0.1" placeholder="Temperatura (°C)">
-    <input id="umidade" type="number" step="0.1" placeholder="Umidade (%)">
-    <input id="dataRegistro" type="date">
-
-    <button id="btnSalvar">Salvar Registro</button>
-
-    <hr>
+    <button id="btnSalvar">Salvar</button>
 
     <h3>Registros</h3>
 
@@ -31,9 +143,10 @@
       <thead>
         <tr>
           <th>Lote</th>
+          <th>Bandeja</th>
+          <th>Data</th>
           <th>Temperatura</th>
           <th>Umidade</th>
-          <th>Data</th>
           <th>Ações</th>
         </tr>
       </thead>
@@ -46,7 +159,8 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { 
-      getFirestore, collection, addDoc, getDocs, deleteDoc, doc 
+      getFirestore, collection, addDoc, deleteDoc, doc,
+      query, where, getDocs 
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -62,72 +176,120 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const selectLote = document.getElementById("selectLote");
-    const lista = document.getElementById("listaMonitoramento");
+    const usuarioLogado = localStorage.getItem("usuarioLogado");
 
-    // CARREGAR LOTES NO SELECT
+    if (!usuarioLogado) {
+      alert("Você precisa estar logado");
+      window.location.href = "login.html";
+    }
+
+    // ============================
+    // CARREGAR LOTES
+    // ============================
     async function carregarLotes() {
-      selectLote.innerHTML = "";
+      const select = document.getElementById("loteSelect");
+      select.innerHTML = "";
 
-      const snapshot = await getDocs(collection(db, "lotes"));
+      const q = query(
+        collection(db, "lotes"),
+        where("dono", "==", usuarioLogado)
+      );
 
-      snapshot.forEach((docItem) => {
-        const item = docItem.data();
+      const snapshot = await getDocs(q);
 
-        const option = document.createElement("option");
-        option.value = docItem.id;
-        option.textContent = `${item.data} - ${item.bandejas} bandejas`;
+      snapshot.forEach(docItem => {
+        const dados = docItem.data();
+        const opt = document.createElement("option");
+        opt.value = dados.numero;
+        opt.textContent = "Lote " + dados.numero;
+        select.appendChild(opt);
+      });
 
-        selectLote.appendChild(option);
+      carregarBandejas();
+    }
+
+    // ============================
+    // CARREGAR BANDEJAS
+    // ============================
+    async function carregarBandejas() {
+      const lote = document.getElementById("loteSelect").value;
+      const select = document.getElementById("bandejaSelect");
+
+      select.innerHTML = "";
+
+      const q = query(
+        collection(db, "lotes"),
+        where("dono", "==", usuarioLogado),
+        where("numero", "==", Number(lote))
+      );
+
+      const snapshot = await getDocs(q);
+
+      snapshot.forEach(docItem => {
+        const dados = docItem.data();
+
+        for (let i = 1; i <= dados.bandejas; i++) {
+          const opt = document.createElement("option");
+          opt.value = i;
+          opt.textContent = "Bandeja " + i;
+          select.appendChild(opt);
+        }
       });
     }
 
-    // SALVAR REGISTRO
-    document.getElementById("btnSalvar").onclick = async function () {
-      const loteId = selectLote.value;
-      const temp = temperatura.value;
-      const umid = umidade.value;
-      const data = dataRegistro.value;
+    document.getElementById("loteSelect").addEventListener("change", carregarBandejas);
 
-      if (!loteId || !temp || !umid || !data) {
+    // ============================
+    // SALVAR MONITORAMENTO
+    // ============================
+    document.getElementById("btnSalvar").onclick = async function () {
+      const lote = loteSelect.value;
+      const bandeja = bandejaSelect.value;
+      const dataReg = data.value.trim();
+      const temp = temperatura.value.trim();
+      const umi = umidade.value.trim();
+
+      if (!lote || !bandeja || !dataReg || !temp || !umi) {
         alert("Preencha todos os campos");
         return;
       }
 
       await addDoc(collection(db, "monitoramento"), {
-        loteId: loteId,
+        lote: Number(lote),
+        bandeja: Number(bandeja),
+        data: dataReg,
         temperatura: Number(temp),
-        umidade: Number(umid),
-        data: data
+        umidade: Number(umi),
+        dono: usuarioLogado
       });
 
-      alert("Registro salvo com sucesso!");
       carregarMonitoramento();
     };
 
-    // LISTAR REGISTROS
+    // ============================
+    // LISTAR MONITORAMENTO
+    // ============================
     async function carregarMonitoramento() {
+      const lista = document.getElementById("listaMonitoramento");
       lista.innerHTML = "";
 
-      const snapshot = await getDocs(collection(db, "monitoramento"));
-      const lotesSnapshot = await getDocs(collection(db, "lotes"));
+      const q = query(
+        collection(db, "monitoramento"),
+        where("dono", "==", usuarioLogado)
+      );
 
-      // Mapa para buscar nome do lote
-      const lotesMap = {};
-      lotesSnapshot.forEach((l) => {
-        lotesMap[l.id] = l.data();
-      });
+      const snapshot = await getDocs(q);
 
-      snapshot.forEach((docItem) => {
-        const item = docItem.data();
+      snapshot.forEach(docItem => {
+        const dados = docItem.data();
 
         const tr = document.createElement("tr");
-
         tr.innerHTML = `
-          <td>${lotesMap[item.loteId]?.data || "Lote removido"}</td>
-          <td>${item.temperatura}°C</td>
-          <td>${item.umidade}%</td>
-          <td>${item.data}</td>
+          <td>${dados.lote}</td>
+          <td>${dados.bandeja}</td>
+          <td>${dados.data}</td>
+          <td>${dados.temperatura}°C</td>
+          <td>${dados.umidade}%</td>
           <td>
             <button class="red" onclick="excluirRegistro('${docItem.id}')">Excluir</button>
           </td>
@@ -137,17 +299,21 @@
       });
     }
 
+    // ============================
     // EXCLUIR REGISTRO
+    // ============================
     window.excluirRegistro = async function (id) {
-      if (confirm("Deseja realmente excluir este registro?")) {
-        await deleteDoc(doc(db, "monitoramento", id));
-        carregarMonitoramento();
-      }
+      await deleteDoc(doc(db, "monitoramento", id));
+      carregarMonitoramento();
     };
 
-    // Carrega ao abrir a página
     carregarLotes();
     carregarMonitoramento();
+
+    window.sair = function () {
+      localStorage.removeItem("usuarioLogado");
+      window.location.href = "login.html";
+    };
   </script>
 
 </body>
