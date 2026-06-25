@@ -25,16 +25,19 @@
 
     <h3>Lotes Cadastrados</h3>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Data</th>
-          <th>Bandejas</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody id="listaLotes"></tbody>
-    </table>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Lote</th>
+            <th>Data</th>
+            <th>Bandejas</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="listaLotes"></tbody>
+      </table>
+    </div>
 
   </div>
 
@@ -70,7 +73,7 @@
         return;
       }
 
-      // Buscar quantidade atual de lotes para gerar número sequencial
+      // Gerar número sequencial baseado na ordem de cadastro
       const snapshot = await getDocs(collection(db, "lotes"));
       const numeroLote = snapshot.size + 1;
 
@@ -96,7 +99,8 @@
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
-          <td>Lote ${item.numero} - ${item.data}</td>
+          <td>${item.numero}</td>
+          <td>${item.data}</td>
           <td>${item.bandejas}</td>
           <td>
             <button class="red" onclick="excluirLote('${docItem.id}')">Excluir</button>
@@ -115,7 +119,6 @@
       }
     };
 
-    // Carrega ao abrir a página
     carregarLotes();
   </script>
 
