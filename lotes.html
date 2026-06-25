@@ -11,9 +11,7 @@
 
     <h2>Cadastrar Lote</h2>
 
-    <!-- REMOVIDO: campo de número do lote -->
-    <!-- <input id="numero" type="text" placeholder="Número do lote"> -->
-
+    <!-- Campo de número removido -->
     <input id="data" type="date">
     <input id="bandejas" type="number" placeholder="Quantidade de bandejas">
 
@@ -64,40 +62,45 @@
     }
 
     // ============================
-    // SALVAR LOTE (NÚMERO AUTOMÁTICO)
+    // SALVAR LOTE (NÚMERO SEQUENCIAL REAL)
     // ============================
-document.getElementById("btnSalvar").onclick = async function () {
-  const dataLote = data.value.trim();
-  const qtdBandejas = bandejas.value.trim();
+    document.getElementById("btnSalvar").onclick = async function () {
+      const dataLote = data.value.trim();
+      const qtdBandejas = bandejas.value.trim();
 
-  if (!dataLote || !qtdBandejas) {
-    alert("Preencha todos os campos");
-    return;
-  }
+      if (!dataLote || !qtdBandejas) {
+        alert("Preencha todos os campos");
+        return;
+      }
 
-  // Busca todos os lotes
-  const snapshot = await getDocs(collection(db, "lotes"));
+      // Busca todos os lotes do usuário
+      const q = query(
+        collection(db, "lotes"),
+        where("dono", "==", usuarioLogado)
+      );
 
-  let maiorNumero = 0;
+      const snapshot = await getDocs(q);
 
-  snapshot.forEach(docItem => {
-    const dados = docItem.data();
-    if (dados.numero > maiorNumero) {
-      maiorNumero = dados.numero;
-    }
-  });
+      let maiorNumero = 0;
 
-  const numeroGerado = maiorNumero + 1;
+      snapshot.forEach(docItem => {
+        const dados = docItem.data();
+        if (dados.numero > maiorNumero) {
+          maiorNumero = dados.numero;
+        }
+      });
 
-  await addDoc(collection(db, "lotes"), {
-    numero: numeroGerado,
-    data: dataLote,
-    bandejas: Number(qtdBandejas),
-    dono: usuarioLogado
-  });
+      const numeroGerado = maiorNumero + 1;
 
-  carregarLotes();
-};
+      await addDoc(collection(db, "lotes"), {
+        numero: numeroGerado,
+        data: dataLote,
+        bandejas: Number(qtdBandejas),
+        dono: usuarioLogado
+      });
+
+      carregarLotes();
+    };
 
     // ============================
     // LISTAR LOTES DO USUÁRIO
