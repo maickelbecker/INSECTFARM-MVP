@@ -6,6 +6,7 @@
   <link rel="stylesheet" href="style.css">
 
   <style>
+    /* Sidebar fixa (igual ao dashboard) */
     .sidebar {
       position: fixed;
       left: 0;
@@ -42,6 +43,7 @@
       background: #6c757d;
     }
 
+    /* Área principal com rolagem */
     .content {
       margin-left: 260px;
       padding: 20px;
@@ -50,6 +52,7 @@
       overflow-y: auto;
     }
 
+    /* Inputs */
     input {
       padding: 10px;
       margin-right: 10px;
@@ -71,6 +74,7 @@
       background: #0056b3;
     }
 
+    /* Tabela estilo Excel */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -96,6 +100,10 @@
       background: #f9f9f9;
     }
 
+    table tr:last-child td {
+      border-bottom: none;
+    }
+
     button.red {
       background: #dc3545;
       color: white;
@@ -112,6 +120,7 @@
 </head>
 <body>
 
+  <!-- SIDEBAR -->
   <div class="sidebar">
     <h2>InsectFarmManager</h2>
     <ul>
@@ -125,6 +134,7 @@
     </ul>
   </div>
 
+  <!-- CONTEÚDO -->
   <div class="content">
 
     <h2>Cadastrar Lote</h2>
@@ -150,11 +160,12 @@
 
   </div>
 
+  <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { 
       getFirestore, collection, addDoc, deleteDoc, doc,
-      query, where, getDocs, orderBy
+      query, where, getDocs 
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -177,6 +188,7 @@
       window.location.href = "login.html";
     }
 
+    // SALVAR LOTE COM NÚMERO SEQUENCIAL REAL
     document.getElementById("btnSalvar").onclick = async function () {
       const dataLote = data.value.trim();
       const qtdBandejas = bandejas.value.trim();
@@ -214,14 +226,14 @@
       carregarLotes();
     };
 
+    // LISTAR LOTES
     async function carregarLotes() {
       const lista = document.getElementById("listaLotes");
       lista.innerHTML = "";
 
       const q = query(
         collection(db, "lotes"),
-        where("dono", "==", usuarioLogado),
-        orderBy("numero", "asc")
+        where("dono", "==", usuarioLogado)
       );
 
       const snapshot = await getDocs(q);
@@ -243,6 +255,7 @@
       });
     }
 
+    // EXCLUIR LOTE
     window.excluirLote = async function (id) {
       await deleteDoc(doc(db, "lotes", id));
       carregarLotes();
