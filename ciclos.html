@@ -6,7 +6,6 @@
   <link rel="stylesheet" href="style.css">
 
   <style>
-    /* Sidebar fixa */
     .sidebar {
       position: fixed;
       left: 0;
@@ -43,7 +42,6 @@
       background: #6c757d;
     }
 
-    /* Área principal */
     .content {
       margin-left: 260px;
       padding: 20px;
@@ -81,7 +79,6 @@
       background: #b02a37;
     }
 
-    /* Tabela estilo Excel */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -110,7 +107,6 @@
 </head>
 <body>
 
-  <!-- SIDEBAR -->
   <div class="sidebar">
     <h2>InsectFarmManager</h2>
     <ul>
@@ -124,7 +120,6 @@
     </ul>
   </div>
 
-  <!-- CONTEÚDO -->
   <div class="content">
 
     <h2>Ciclos Biológicos</h2>
@@ -159,7 +154,6 @@
 
   </div>
 
-  <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { 
@@ -187,9 +181,6 @@
       window.location.href = "login.html";
     }
 
-    // ============================
-    // CARREGAR LOTES DO USUÁRIO
-    // ============================
     async function carregarLotes() {
       const select = document.getElementById("loteSelect");
       select.innerHTML = "";
@@ -212,9 +203,6 @@
       carregarBandejas();
     }
 
-    // ============================
-    // CARREGAR BANDEJAS DO LOTE
-    // ============================
     async function carregarBandejas() {
       const lote = document.getElementById("loteSelect").value;
       const select = document.getElementById("bandejaSelect");
@@ -243,14 +231,11 @@
 
     document.getElementById("loteSelect").addEventListener("change", carregarBandejas);
 
-    // ============================
-    // SALVAR CICLO
-    // ============================
     document.getElementById("btnSalvar").onclick = async function () {
-      const lote = loteSelect.value;
-      const dataCiclo = data.value.trim();
-      const bandeja = bandejaSelect.value;
-      const estagio = estagio.value;
+      const lote = document.getElementById("loteSelect").value;
+      const dataCiclo = document.getElementById("data").value.trim();
+      const bandeja = document.getElementById("bandejaSelect").value;
+      const estagio = document.getElementById("estagio").value;
 
       if (!lote || !dataCiclo || !bandeja || !estagio) {
         alert("Preencha todos os campos");
@@ -268,9 +253,6 @@
       carregarCiclos();
     };
 
-    // ============================
-    // LISTAR CICLOS
-    // ============================
     async function carregarCiclos() {
       const lista = document.getElementById("listaCiclos");
       lista.innerHTML = "";
@@ -300,9 +282,6 @@
       });
     }
 
-    // ============================
-    // EXCLUIR CICLO
-    // ============================
     window.excluirCiclo = async function (id) {
       await deleteDoc(doc(db, "ciclos", id));
       carregarCiclos();
